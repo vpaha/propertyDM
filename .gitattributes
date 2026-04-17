@@ -1,0 +1,37 @@
+###############################################################################
+# GitHub Linguist configuration for PropertyClaims / Reparo Blazor Auto app
+###############################################################################
+
+# Ignore build output
+**/bin/** linguist-generated=true
+**/obj/** linguist-generated=true
+
+# Ignore published / package / tool output if present
+**/publish/** linguist-generated=true
+**/artifacts/** linguist-generated=true
+**/packages/** linguist-vendored=true
+
+# Ignore third-party frontend libraries
+**/wwwroot/lib/** linguist-vendored=true
+
+# Ignore minified/generated static assets
+**/*.min.js linguist-generated=true
+**/*.min.css linguist-generated=true
+**/*.bundle.js linguist-generated=true
+**/*.bundle.css linguist-generated=true
+**/*.map linguist-generated=true
+
+# Treat Razor components/pages as C#
+*.razor linguist-language=C#
+
+# Optional: treat Razor views as C# too, if any exist later
+*.cshtml linguist-language=C#
+
+# Ignore generated designer / assembly metadata files
+**/*.designer.cs linguist-generated=true
+**/*AssemblyInfo.cs linguist-generated=true
+**/*GlobalUsings.g.cs linguist-generated=true
+**/*.AssemblyAttributes.cs linguist-generated=true
+
+# Ignore logs and runtime artifacts
+**/Logs/** linguist-generated=true
