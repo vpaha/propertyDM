@@ -1,7 +1,9 @@
 ﻿@page "/settings"
+@page "/"
 @attribute [AllowAnonymous]
 
 @using Microsoft.JSInterop
+@using Syncfusion.Blazor.Calendars
 
 @inject IJSRuntime JSRuntime
 @inject NavigationManager nav
@@ -16,24 +18,32 @@
         <CardContent EnableSeparator="true">
             <div class="settings-row">
                 <label for="isdark-check">Switch to dark mode:</label>
-                <SfSwitch id="isdark-check" TChecked="bool" Checked="@Theme.IsDarkMode" ValueChange="OnDarkModeChange" />
+                <SfSwitch id="isdark-check" TChecked="bool" Checked="@theme.IsDarkMode" ValueChange="OnDarkModeChange" />
             </div>
         </CardContent>
         <CardContent EnableSeparator="true">
             <div style="width: fit-content;">
                 <label for="culture-select">Language and Region:</label>
-                <SfDropDownList id="culture-select" TValue="string" TItem="CultureOption" DataSource="@SupportedCultures" Value="@SelectedCulture">
+                <SfDropDownList id="culture-select" TValue="string" TItem="CultureOption" DataSource="@cultures.Options" Value="@selected">
                     <DropDownListFieldSettings Text="Country" Value="Culture" />
                     <DropDownListEvents TValue="string" TItem="CultureOption" ValueChange="OnCultureChanged" />
                 </SfDropDownList>
+            </div>
+            <div style="width: fit-content;">
+                <SfDatePicker TValue="DateOnly?" Format="@CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern"
+                              Placeholder="Date format" FloatLabelType="FloatLabelType.Always" EnableMask=true>
+                    <DatePickerMaskPlaceholder Day="dd" Month="mm" Year="yyyy"></DatePickerMaskPlaceholder>
+                </SfDatePicker>
+            </div>
+            <div style="width: fit-content;">
+                <SfNumericTextBox Placeholder="Currency format" FloatLabelType="FloatLabelType.Always" TValue="Decimal?" Format="C" aria-label="Enter a currency value" Value="100"></SfNumericTextBox>
             </div>
         </CardContent>
         <AuthorizeView>
             <Authorized Context="auth">
                 <CardContent EnableSeparator="true">
                     <h3>Application user list</h3>
-                    <SfGrid TValue="AppUser" Height="512px"
-                            Toolbar="@(new List<string>() { "Search" })"
+                    <SfGrid TValue="AppUser" Toolbar="@(new List<string>() { "Search" })"
                             AllowPaging="true" AllowReordering="true" AllowSorting="true" AllowFiltering="true" ShowColumnMenu="true"
                             DataSource="@appUsers">
                         <GridPageSettings PageSize="GridConstants.RowCount"></GridPageSettings>
@@ -70,61 +80,81 @@
     private sealed record ThemeSettings(string ThemeName, bool IsDarkMode, string Culture);
 
     private IReadOnlyList<AppUser> appUsers { get; set; } = default!;
- 
-    private string SelectedCulture = CultureInfo.CurrentCulture.Name;
-    private ThemeSettings Theme = new("custom1", false, "ru-RU");
 
-    private CultureOption[] SupportedCultures = new CultureData().Options;
+    private readonly CultureData cultures = new();
+    private string selected = string.Empty;
+    private ThemeSettings theme { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        if (!SupportedCultures.Any(c => c.Culture.Equals(SelectedCulture, StringComparison.OrdinalIgnoreCase))) SelectedCulture = SupportedCultures.First().Culture;
-        Theme = Theme with { Culture = SelectedCulture };
+        selected = GetInitialCulture();
+
+        theme = CreateTheme(selected);
 
         appUsers = await userService.GetUsersAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender) return;
+        if (!firstRender)
+            return;
 
         var stored = await JSRuntime.InvokeAsync<ThemeSettings?>("getTheme");
-        if (stored is null) return;
-        Theme = stored with { Culture = SelectedCulture };
+
+        if (stored is null)
+            return;
+
+        ApplyTheme(stored);
         StateHasChanged();
     }
 
     private async Task OnDarkModeChange(Syncfusion.Blazor.Buttons.ChangeEventArgs<bool> args)
     {
-        Theme = Theme with
+        ApplyTheme(theme with
         {
             IsDarkMode = args.Checked
-        };
+        });
 
-        await JSRuntime.InvokeVoidAsync("setTheme", Theme);
-        await _httpClient.PostAsJsonAsync(nav.ToAbsoluteUri("config/theme"), new ThemeSettings(
-                Theme.ThemeName,
-                Theme.IsDarkMode,
-                Theme.Culture));
+        await PersistThemeAsync();
     }
 
     private async Task OnCultureChanged(ChangeEventArgs<string, CultureOption> args)
     {
         var culture = args?.Value;
-
-        if (string.IsNullOrWhiteSpace(culture) || culture.Equals(SelectedCulture, StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(culture) || culture.Equals(selected, StringComparison.OrdinalIgnoreCase))
+        {
             return;
+        }
 
-        SelectedCulture = culture;
-
-        Theme = Theme with
+        ApplyTheme(theme with
         {
             Culture = culture
-        };
+        });
 
-        await JSRuntime.InvokeVoidAsync("setCulture", culture);
-        await JSRuntime.InvokeVoidAsync("setTheme", Theme);
+        await JSRuntime.InvokeVoidAsync("setCulture", selected);
+        await PersistThemeAsync();
 
         nav.NavigateTo(nav.Uri, forceLoad: true);
+    }
+
+    private void ApplyTheme(ThemeSettings value)
+    {
+        theme = value;
+        selected = value.Culture;
+    }
+
+    private ThemeSettings CreateTheme(string culture) => new(ThemeName: "Default", IsDarkMode: false, Culture: culture);
+
+    private string GetInitialCulture()
+    {
+        var currentCulture = CultureInfo.CurrentCulture.Name;
+        return cultures.Options.Any(c => c.Culture.Equals(currentCulture, StringComparison.OrdinalIgnoreCase)) ? currentCulture : cultures.DefaultCulture.Name;
+    }
+
+    private async Task PersistThemeAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("setTheme", theme);
+
+        await _httpClient.PostAsJsonAsync(nav.ToAbsoluteUri("config/theme"), theme);
     }
 }

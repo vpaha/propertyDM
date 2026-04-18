@@ -3,16 +3,15 @@
     public const string MediaQuery = "MediaQuery";
 }
 
-public readonly struct GridConstants
+public static class GridConstants
 {
     public const int PageCount = 10;
     public const int RowCount = 25;
-    public readonly string[] PageSizes;
 
-    public GridConstants()
-    {
-        PageSizes = ["5", "10", "25", "50", "100"];
-    }
+    public static readonly string[] PageSizes =
+    [
+        "5","10","25","50","100"
+    ];
 }
 
 public readonly struct ToastConstants

@@ -153,7 +153,7 @@ internal static class RouteExtensions
         {
             var dto = await ctx.Request.ReadFromJsonAsync<ThemeCookieDto>();
             var cultureCode = dto?.Culture;
-            if (string.IsNullOrWhiteSpace(cultureCode)) cultureCode = "ru-RU";
+            if (string.IsNullOrWhiteSpace(cultureCode)) cultureCode = new CultureData().DefaultCulture.Name;
 
             var requestCulture = new RequestCulture(cultureCode);
             ctx.Response.Cookies.Append(

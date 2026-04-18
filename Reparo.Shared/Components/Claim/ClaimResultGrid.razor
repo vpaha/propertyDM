@@ -25,7 +25,7 @@
             Toolbar="@(new List<string>() { "Search" })"
             AllowPaging="true" AllowReordering="true" AllowSorting="true" AllowFiltering="true" ShowColumnMenu="true"
             DataSource="@Claims">
-        <GridPageSettings PageSize="GridConstants.RowCount"></GridPageSettings>
+        <GridPageSettings PageSize="GridConstants.RowCount" PageSizes="@GridConstants.PageSizes"></GridPageSettings>
         <GridTemplates>
             <EmptyRecordTemplate>
                 <div>@SharedResource.NoResult</div>
