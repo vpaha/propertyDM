@@ -301,27 +301,16 @@ public partial class Program
 
     private void ConfigureLocalization(WebApplicationBuilder builder)
     {
-        var supportedCultures = new[]
-        {
-            new CultureInfo("en-US"),
-            new CultureInfo("en-GB"),
-            new CultureInfo("de-DE"),
-            new CultureInfo("fr-FR"),
-            new CultureInfo("es-ES"),
-            new CultureInfo("pt-BR"),
-            new CultureInfo("de-DE"),
-            new CultureInfo("ru-RU"),
-            new CultureInfo("zh-CN"),
-            new CultureInfo("ja-JP"),
-        };
-        supportedCultures.First(c => c.Name == "en-US").DateTimeFormat.ShortDatePattern = "MM/dd/yyyy";
+        var cultures = new CultureData();
+
+        var cultureList = cultures.CultureList;
+        cultureList.First(c => c.Name == "en-US").DateTimeFormat.ShortDatePattern = "MM/dd/yyyy";
 
         builder.Services.Configure<RequestLocalizationOptions>(options =>
         {
-            options.DefaultRequestCulture = new RequestCulture("ru-RU");
-
-            options.SupportedCultures = supportedCultures;
-            options.SupportedUICultures = supportedCultures;
+            options.DefaultRequestCulture = new RequestCulture(cultures.DefaultCulture);
+            options.SupportedCultures = cultureList;
+            options.SupportedUICultures = cultureList;
 
             options.RequestCultureProviders =
             [

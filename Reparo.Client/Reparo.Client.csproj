@@ -25,6 +25,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Reparo.Shared\Components\Reparo.Components.csproj" />
 		<ProjectReference Include="..\Reparo.Shared\Models\Reparo.Models.csproj" />
+		<ProjectReference Include="..\Reparo.Shared\Utilities\Reparo.Utilities.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Folder Include="wwwroot\" />

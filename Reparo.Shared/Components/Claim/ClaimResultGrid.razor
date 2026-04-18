@@ -124,7 +124,7 @@
 
     private bool isExpanded = false;
 
-    public SfGrid<ClaimSearchResponse>? claimGrid;
+    public SfGrid<ClaimSearchResponse> claimGrid { get; set; } = default!;
 
     public async Task ApplyFilterAsync(ClaimSearchFilter filter, CancellationToken ct = default)
     {

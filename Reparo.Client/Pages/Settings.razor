@@ -32,7 +32,7 @@
             <Authorized Context="auth">
                 <CardContent EnableSeparator="true">
                     <h3>Application user list</h3>
-                    <SfGrid ID="claim-grid" TValue="AppUser" Height="512px"
+                    <SfGrid TValue="AppUser" Height="512px"
                             Toolbar="@(new List<string>() { "Search" })"
                             AllowPaging="true" AllowReordering="true" AllowSorting="true" AllowFiltering="true" ShowColumnMenu="true"
                             DataSource="@appUsers">
@@ -67,33 +67,18 @@
 </style>
 
 @code {
-    private sealed record CultureOption(string Country, string Culture);
     private sealed record ThemeSettings(string ThemeName, bool IsDarkMode, string Culture);
 
-    private IReadOnlyList<AppUser>? appUsers { get; set; }
-
-    private IReadOnlyList<CultureOption> SupportedCultures =
-    [
-        new("United States", "en-US"),
-        new("United Kingdom", "en-GB"),
-        new("Germany", "de-DE"),
-        new("France", "fr-FR"),
-        new("Spain", "es-ES"),
-        new("Brazil", "pt-BR"),
-        new("Russia", "ru-RU"),
-        new("China", "zh-CN"),
-        new("Japan", "ja-JP")
-    ];
-
+    private IReadOnlyList<AppUser> appUsers { get; set; } = default!;
+ 
     private string SelectedCulture = CultureInfo.CurrentCulture.Name;
     private ThemeSettings Theme = new("custom1", false, "ru-RU");
 
+    private CultureOption[] SupportedCultures = new CultureData().Options;
+
     protected override async Task OnInitializedAsync()
     {
-        if (!SupportedCultures.Any(c => c.Culture.Equals(SelectedCulture, StringComparison.OrdinalIgnoreCase)))
-        {
-            SelectedCulture = SupportedCultures.First().Culture;
-        }
+        if (!SupportedCultures.Any(c => c.Culture.Equals(SelectedCulture, StringComparison.OrdinalIgnoreCase))) SelectedCulture = SupportedCultures.First().Culture;
         Theme = Theme with { Culture = SelectedCulture };
 
         appUsers = await userService.GetUsersAsync();
