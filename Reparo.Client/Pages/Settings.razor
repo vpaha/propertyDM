@@ -51,15 +51,65 @@
                                 <div>@Reparo.Shared.Components.Resource.SharedResource.NoResult</div>
                             </EmptyRecordTemplate>
                         </GridTemplates> *@
-                        <GridSearchSettings Fields="@(new string[] { "ClaimId" })" Operator=Syncfusion.Blazor.Operator.StartsWith IgnoreCase="true" IgnoreAccent="true"></GridSearchSettings>
+                        <GridSearchSettings Fields="@(new string[] { "UserName" })" Operator=Syncfusion.Blazor.Operator.StartsWith IgnoreCase="true" IgnoreAccent="true"></GridSearchSettings>
                         <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.CheckBox" Mode="FilterBarMode.Immediate"></GridFilterSettings>
                         <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Multiple" CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
+                        <GridTemplates>
+                            <DetailTemplate Context="item">
+                                @{
+                                    var user = (AppUser)item;
+                                }
+
+                                <div style="padding:12px 24px;">
+                                    <SfGrid TValue="AppRole"
+                                            DataSource="@(user.Roles ?? [])"
+                                            Toolbar="@(new List<string> { "Add", "Delete", "Update", "Cancel" })">
+                                        <GridEditSettings AllowAdding="true"
+                                                          AllowDeleting="true"
+                                                          AllowEditing="true"
+                                                          Mode="EditMode.Normal">
+                                        </GridEditSettings>
+
+                                        <GridEvents TValue="AppRole"
+                                                    OnActionBegin="@(args => OnRoleActionBegin(args, user))">
+                                        </GridEvents>
+
+                                        <GridColumns>
+                                            <GridColumn Field="@nameof(AppRole.Id)"
+                                                        IsPrimaryKey="true"
+                                                        Visible="false">
+                                            </GridColumn>
+
+                                            <GridColumn Field="@nameof(AppRole.Name)" HeaderText="Role">
+                                                <EditTemplate Context="roleContext">
+                                                    <SfDropDownList TValue="int?" TItem="AppRole"
+                                                                    DataSource="@availableRoles"
+                                                                    Placeholder="Select role"
+                                                                    Value="@GetRoleId(roleContext)">
+                                                        <DropDownListFieldSettings Value="@nameof(AppRole.Id)"
+                                                                                   Text="@nameof(AppRole.Name)" />
+                                                        <DropDownListEvents TValue="int?" TItem="AppRole"
+                                                                            ValueChange="@(args => OnRoleChanged(args, roleContext))" />
+                                                    </SfDropDownList>
+                                                </EditTemplate>
+                                            </GridColumn>
+
+                                            <GridColumn Field="@nameof(AppRole.NormalizedName)"
+                                                        HeaderText="Normalized Role"
+                                                        AllowEditing="false">
+                                            </GridColumn>
+                                        </GridColumns>
+                                    </SfGrid>
+                                </div>
+                            </DetailTemplate>
+                        </GridTemplates>
                         <GridColumns>
                             <GridColumn Type="ColumnType.CheckBox" AllowFiltering="false" AllowSorting="false" Width="50"></GridColumn>
-                            <GridColumn Field=@nameof(AppUser.Id) HeaderText="ID" Type="ColumnType.Integer"></GridColumn>
                             <GridColumn Field=@nameof(AppUser.UserName) HeaderText="User name"></GridColumn>
                             <GridColumn Field=@nameof(AppUser.Email) HeaderText="Email"></GridColumn>
                             <GridColumn Field=@nameof(AppUser.PhoneNumber) HeaderText="Phone number"></GridColumn>
+                            <GridColumn Field=@nameof(AppUser.ProviderDisplayName) HeaderText="Provider"></GridColumn>
+                            <GridColumn Field=@nameof(AppUser.RoleNames) HeaderText="Roles"></GridColumn>
                         </GridColumns>
                     </SfGrid>
                 </CardContent>
@@ -78,7 +128,11 @@
 @code {
     private sealed record ThemeSettings(string ThemeName, bool IsDarkMode, string Culture);
 
-    private IReadOnlyList<AppUser> appUsers { get; set; } = default!;
+    private ThemeSettings CreateTheme(string culture) =>
+        new("Default", false, culture);
+
+    private IReadOnlyList<AppUser> appUsers { get; set; } = [];
+    private IReadOnlyList<AppRole> availableRoles { get; set; } = [];
 
     private readonly CultureData cultures = new();
     private string selected = string.Empty;
@@ -87,10 +141,9 @@
     protected override async Task OnInitializedAsync()
     {
         selected = GetInitialCulture();
-
         theme = CreateTheme(selected);
 
-        appUsers = await userService.GetUsersAsync();
+        await LoadDataAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -107,6 +160,12 @@
         StateHasChanged();
     }
 
+    private async Task LoadDataAsync()
+    {
+        appUsers = await userService.GetUsersAsync();
+        availableRoles = await userService.GetRolesAsync();
+    }
+
     private async Task OnDarkModeChange(Syncfusion.Blazor.Buttons.ChangeEventArgs<bool> args)
     {
         ApplyTheme(theme with
@@ -120,15 +179,14 @@
     private async Task OnCultureChanged(ChangeEventArgs<string, CultureOption> args)
     {
         var culture = args?.Value;
-        if (string.IsNullOrWhiteSpace(culture) || culture.Equals(selected, StringComparison.OrdinalIgnoreCase))
+
+        if (string.IsNullOrWhiteSpace(culture) ||
+            culture.Equals(selected, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
 
-        ApplyTheme(theme with
-        {
-            Culture = culture
-        });
+        ApplyTheme(theme with { Culture = culture });
 
         await JSRuntime.InvokeVoidAsync("setCulture", selected);
         await PersistThemeAsync();
@@ -142,18 +200,60 @@
         selected = value.Culture;
     }
 
-    private ThemeSettings CreateTheme(string culture) => new(ThemeName: "Default", IsDarkMode: false, Culture: culture);
-
     private string GetInitialCulture()
     {
         var currentCulture = CultureInfo.CurrentCulture.Name;
-        return cultures.Options.Any(c => c.Culture.Equals(currentCulture, StringComparison.OrdinalIgnoreCase)) ? currentCulture : cultures.DefaultCulture.Name;
+
+        return cultures.Options.Any(c =>
+            c.Culture.Equals(currentCulture, StringComparison.OrdinalIgnoreCase))
+            ? currentCulture
+            : cultures.DefaultCulture.Name;
     }
 
     private async Task PersistThemeAsync()
     {
         await JSRuntime.InvokeVoidAsync("setTheme", theme);
-
         await _httpClient.PostAsJsonAsync(nav.ToAbsoluteUri("config/theme"), theme);
+    }
+
+    private async Task OnRoleActionBegin(ActionEventArgs<AppRole> args, AppUser user)
+    {
+        if (args.RequestType == Syncfusion.Blazor.Grids.Action.Save && args.Data is not null)
+        {
+            await userService.AddRoleToUserAsync(user.Id, args.Data.Name!, CancellationToken.None);
+            await RefreshUsersAsync();
+        }
+
+        if (args.RequestType == Syncfusion.Blazor.Grids.Action.Delete && args.Data is not null)
+        {
+            await userService.RemoveRoleFromUserAsync(user.Id, args.Data.Id, CancellationToken.None);
+            await RefreshUsersAsync();
+        }
+    }
+
+    private async Task RefreshUsersAsync()
+    {
+        appUsers = await userService.GetUsersAsync();
+        StateHasChanged();
+    }
+
+    private int? GetRoleId(object roleContext)
+    {
+        var role = (AppRole)roleContext;
+        return role.Id == 0 ? null : role.Id;
+    }
+
+    private void OnRoleChanged(ChangeEventArgs<int?, AppRole> args, object roleContext)
+    {
+        var role = (AppRole)roleContext;
+
+        var selectedRole = availableRoles.FirstOrDefault(x => x.Id == args.Value);
+        if (selectedRole is null)
+            return;
+
+        role.Id = selectedRole.Id;
+        role.Name = selectedRole.Name;
+        role.NormalizedName = selectedRole.NormalizedName;
+        role.ConcurrencyStamp = selectedRole.ConcurrencyStamp;
     }
 }
