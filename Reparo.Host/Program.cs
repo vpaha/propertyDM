@@ -11,7 +11,6 @@ using Syncfusion.Blazor;
 using Syncfusion.Blazor.Popups;
 using Syncfusion.Blazor.SmartComponents;
 using Syncfusion.Licensing;
-using System.Globalization;
 using System.Net.Http.Headers;
 
 namespace Reparo;
@@ -101,8 +100,9 @@ public partial class Program
         builder.Services.AddCascadingAuthenticationState();
         builder.Services.AddAuthorization(options =>
         {
+            options.AddPolicy("Admin", p => p.RequireRole("admin"));
             options.AddPolicy("SignedInUser", p => p.RequireRole("user", "admin"));
-            options.AddPolicy("Vendor", p => p.RequireRole("vendor"));
+            options.AddPolicy("Vendors", p => p.RequireRole("vendor"));
         });
 
         builder.Services.AddHttpContextAccessor();

@@ -7,13 +7,13 @@
 <div>
     <a href="authentication/clear" class="e-btn e-info e-outline" title="browser Cache">Clear browser Cache</a>
 </div>
-<div>
-    <AuthorizeView Policy="Vendor">
-        <Authorized Context="auth">
+<AuthorizeView>
+    <Authorized Context="auth">
+        <div>
             <a href="claim" class="e-btn e-primary e-outline" title="sign in">Claims</a>
-        </Authorized>
-    </AuthorizeView>
-</div>
+        </div>
+    </Authorized>
+</AuthorizeView>
 <div>
     &copy; @DateTime.UtcNow.ToString("yyyy") Microsoft
 </div>

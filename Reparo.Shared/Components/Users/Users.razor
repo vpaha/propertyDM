@@ -33,6 +33,11 @@
         </GridColumns>
     </SfGrid>
 }
+<style>
+    .e-detailrow {
+        background-color: lightgray;
+    }
+</style>
 @code {
     [Parameter, EditorRequired]
     public IReadOnlyList<AppUser> UsersData { get; set; } = [];

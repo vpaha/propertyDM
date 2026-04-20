@@ -38,9 +38,13 @@
             </div>
         </CardContent>
         <AuthorizeView>
+@*             <AuthorizeView Policy="Admin"> *@
             <Authorized>
                 <CardContent EnableSeparator="true">
-                    <h3>Application user list</h3>
+                    <UserInfo></UserInfo>
+                </CardContent>
+                <CardContent EnableSeparator="true">
+                    <h3>User list</h3>
                     <Users UsersData="appUsers" AvailableRoles="availableRoles" RefreshRequested="RefreshUsersAsync" />
                 </CardContent>
             </Authorized>

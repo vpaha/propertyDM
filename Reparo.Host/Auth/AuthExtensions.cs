@@ -108,12 +108,17 @@ public static class AuthExtensions
                 if (!string.IsNullOrWhiteSpace(clientSecret))
                     options.ClientSecret = clientSecret;
 
+                var extraScope = oidc["Scope"];
+                AddScopes(options, extraScope);
+
                 options.ResponseType = "code";
                 options.AccessDeniedPath = "/accessdenied";
                 options.CallbackPath = "/signin-oidc";
                 options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.SaveTokens = true;
                 options.MapInboundClaims = false;
+
+                options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -135,6 +140,22 @@ public static class AuthExtensions
             });
 
         return services;
+    }
+
+    private static void AddScopes(OpenIdConnectOptions options, string? extraScopes, params string[] defaults)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+
+        var scopes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var scope in defaults) if (!string.IsNullOrWhiteSpace(scope)) scopes.Add(scope);
+
+        if (!string.IsNullOrWhiteSpace(extraScopes))
+        {
+            foreach (var scope in extraScopes.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                scopes.Add(scope);
+        }
+
+        foreach (var scope in scopes) options.Scope.Add(scope);
     }
 
     private static async Task ProvisionUserAsync(

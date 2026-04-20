@@ -10,14 +10,16 @@
         <GridColumn Field="@nameof(AppRole.Id)" IsPrimaryKey="true" Visible="false"></GridColumn>
         <GridColumn Field="@nameof(AppRole.Name)" HeaderText="Role">
             <EditTemplate Context="roleContext">
-                <SfDropDownList TValue="int?"
-                                TItem="AppRole"
-                                DataSource="@AvailableRoles"
-                                Placeholder="Select role"
-                                Value="@GetRoleId(roleContext)">
-                    <DropDownListFieldSettings Value="@nameof(AppRole.Id)" Text="@nameof(AppRole.Name)" />
-                    <DropDownListEvents TValue="int?" TItem="AppRole" ValueChange="@(args => OnRoleChanged(args, roleContext))" />
-                </SfDropDownList>
+                <div style="width: fit-content;">
+                    <SfDropDownList TValue="int?"
+                                    TItem="AppRole"
+                                    DataSource="@AvailableRoles"
+                                    Placeholder="Select role"
+                                    Value="@GetRoleId(roleContext)">
+                        <DropDownListFieldSettings Value="@nameof(AppRole.Id)" Text="@nameof(AppRole.Name)" />
+                        <DropDownListEvents TValue="int?" TItem="AppRole" ValueChange="@(args => OnRoleChanged(args, roleContext))" />
+                    </SfDropDownList>
+                </div>
             </EditTemplate>
         </GridColumn>
     </GridColumns>
