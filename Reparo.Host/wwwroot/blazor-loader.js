@@ -2,7 +2,7 @@
 const claimSearchView = { handle: null };
 const themeStorageKey = "themevar";
 const defaultThemeName = "custom1";
-const defaultCulture = "ru-RU";
+const defaultCulture = "ja-JP";
 
 document.addEventListener("DOMContentLoaded", () =>
 {
