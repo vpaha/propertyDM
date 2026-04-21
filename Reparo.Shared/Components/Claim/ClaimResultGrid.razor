@@ -120,11 +120,11 @@
 
     private readonly List<string> apiConflictMessages = [];
 
-    public IEnumerable<ClaimSearchResponse> Claims { get; private set; } = default!;
+    private IEnumerable<ClaimSearchResponse> Claims { get; set; } = default!;
 
     private bool isExpanded = false;
 
-    public SfGrid<ClaimSearchResponse> claimGrid { get; set; } = default!;
+    private SfGrid<ClaimSearchResponse>? claimGrid;
 
     public async Task ApplyFilterAsync(ClaimSearchFilter filter, CancellationToken ct = default)
     {
@@ -157,7 +157,7 @@
         }
     }
 
-    public async Task ShowTheRecord(ClaimSearchResponse? claim)
+    private async Task ShowTheRecord(ClaimSearchResponse? claim)
     {
         isExpanded = !isExpanded;
 
@@ -167,7 +167,7 @@
             await OnOpenBladeEvent.InvokeAsync(null);
     }
 
-    public string GetStatusCssClass(ClaimSearchResponse? claim) => claim?.Status?.ToLower() switch
+    private string GetStatusCssClass(ClaimSearchResponse? claim) => claim?.Status?.ToLower() switch
     {
         ClaimStatusConstants.Pend => "e-block e-info",
         ClaimStatusConstants.Open or ClaimStatusConstants.Log or ClaimStatusConstants.Adjudicated or ClaimStatusConstants.WaitPrice or ClaimStatusConstants.Priced => "e-block e-primary",
@@ -178,9 +178,9 @@
     };
 
     // Placeholder event handlers for future use
-    public void OnProviderClicked(MouseEventArgs e) { }
-    public void OnEnrollmentClicked(MouseEventArgs e) { }
-    public void OnClaimClicked(MouseEventArgs e) { }
-    public void OnRowSelected(RowSelectEventArgs<ClaimSearchResponse> args) { }
-    public void OnRowDeSelected(RowDeselectEventArgs<ClaimSearchResponse> args) { }
+    private void OnProviderClicked(MouseEventArgs e) { }
+    private void OnEnrollmentClicked(MouseEventArgs e) { }
+    private void OnClaimClicked(MouseEventArgs e) { }
+    private void OnRowSelected(RowSelectEventArgs<ClaimSearchResponse> args) { }
+    private void OnRowDeSelected(RowDeselectEventArgs<ClaimSearchResponse> args) { }
 }

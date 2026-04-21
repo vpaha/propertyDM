@@ -12,6 +12,7 @@ using Syncfusion.Blazor.Popups;
 using Syncfusion.Blazor.SmartComponents;
 using Syncfusion.Licensing;
 using System.Net.Http.Headers;
+using Qnxt.Api.Internals;
 
 namespace Reparo;
 
@@ -146,19 +147,27 @@ public partial class Program
             var ctx = sp.GetRequiredService<IHttpContextAccessor>().HttpContext ?? throw new InvalidOperationException("HttpContext is not available (request scope required).");
             client.BaseAddress = BuildBaseAddressFromRequest(ctx.Request, configuredPathBase);
         });
-        // Outbound token
-        builder.Services.AddScoped<TokenHandler>();
 
-        // Corporate API
+        // Corp API
         var claimUri = config["Endpoints:Api:ClaimUri"] ?? throw new InvalidOperationException("Endpoints:Api:ClaimUri is not configured.");
+        var envId = config["UserEnvironment:EnvId"] ?? throw new InvalidOperationException("UserEnvironment:EnvId is not configured.");
+
+        var licenseManager = new LicenseManager();
+        var partnerBlock = licenseManager.CreatePartnerBlock("QNXT MODERNIZATION UI", "json").ToBase64String();
+
+        builder.Services.Configure<TokenHandlerOptions>(options =>
+        {
+            options.EnvId = envId;
+            options.PartnerBlock = partnerBlock;
+        });
+        builder.Services.AddTransient<TokenHandler>();
 
         builder.Services.AddHttpClient<IClaimService, ClaimService>(client =>
         {
             client.BaseAddress = new Uri(claimUri);
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        })
-        .AddHttpMessageHandler<TokenHandler>();
+        }).AddHttpMessageHandler<TokenHandler>();
 
         // Optional AI
         ConfigureOpenAI(builder, config);

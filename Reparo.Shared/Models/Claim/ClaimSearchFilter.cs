@@ -17,7 +17,4 @@ public class ClaimSearchFilter
     public int Take { get; set; }
 
     public bool IsToUpdate { get; set; }
-
-    [Required, Display(Name = "date")]
-    public DateOnly? EffDate { get; set; } = default!;
 }

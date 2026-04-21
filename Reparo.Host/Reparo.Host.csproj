@@ -11,7 +11,7 @@
 		<RootNamespace>Reparo</RootNamespace>
 		<UserSecretsId>d6c3271d-57ef-4c3d-8657-34257ee35848</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-		<AssemblyVersion>4.0.5.5</AssemblyVersion>
+		<AssemblyVersion>4.0.5.6</AssemblyVersion>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'" />
@@ -49,6 +49,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.2" />
 		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="10.2.0" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+		<PackageReference Include="Qnxt.Api.Internals" Version="26.300.202604162-Debug" />
 		<PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
 		<PackageReference Include="FontAwesome" Version="4.7.0" />
 

@@ -22,13 +22,6 @@
             <div class="validation-message">
                 <ValidationMessage For="@(() => ClaimFilter.MemId)" />
             </div>
-            <SfDatePicker CssClass="e-small" TValue="DateOnly?" @bind-Value="@ClaimFilter.EffDate" Format="@CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern"
-                          Placeholder="Effective Date" FloatLabelType="FloatLabelType.Always" EnableMask=true>
-                <DatePickerMaskPlaceholder Day="dd" Month="mm" Year="yyyy"></DatePickerMaskPlaceholder>
-            </SfDatePicker>
-            <div class="validation-message">
-                <ValidationMessage ID="errMsgAttributeEffectiveDate" For="@(() => ClaimFilter.EffDate)" />
-            </div>
         </div>
     </FormTemplate>
     <FormButtons>
