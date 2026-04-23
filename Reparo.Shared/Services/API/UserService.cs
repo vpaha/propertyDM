@@ -6,9 +6,8 @@ public interface IUserService
 {
     Task ProvisionAsync(ClaimsPrincipal principal, CancellationToken ct = default);
     Task<IReadOnlyList<AppUser>> GetUsersAsync(CancellationToken cancellationToken = default);
-    Task AddRoleToUserAsync(int userId, string roleName, CancellationToken ct = default);
-    Task RemoveRoleFromUserAsync(int userId, int roleId, CancellationToken ct = default);
     Task<IReadOnlyList<AppRole>> GetRolesAsync(CancellationToken ct = default);
+    Task UpdateRolesAsync(AppUser user, CancellationToken ct = default);
 }
 
 public sealed class UserService : BaseService, IUserService
@@ -129,30 +128,6 @@ public sealed class UserService : BaseService, IUserService
         return user.Id;
     }
 
-    public async Task AddRoleToUserAsync(int userId, string roleName, CancellationToken ct = default)
-    {
-        var role = await _context.Roles.SingleOrDefaultAsync(r => r.Name == roleName, ct) ?? throw new InvalidOperationException($"Role '{roleName}' was not found.");
-        var exists = await _context.UserRoles.AnyAsync(x => x.UserId == userId && x.RoleId == role.Id, ct);
-        if (exists) return;
-
-        _context.UserRoles.Add(new IdentityUserRole<int>
-        {
-            UserId = userId,
-            RoleId = role.Id
-        });
-
-        await _context.SaveChangesAsync(ct);
-    }
-
-    public async Task RemoveRoleFromUserAsync(int userId, int roleId, CancellationToken ct = default)
-    {
-        var userRole = await _context.UserRoles.SingleOrDefaultAsync(x => x.UserId == userId && x.RoleId == roleId, ct);
-        if (userRole is null) return;
-
-        _context.UserRoles.Remove(userRole);
-        await _context.SaveChangesAsync(ct);
-    }
-
     public async Task<IReadOnlyList<AppRole>> GetRolesAsync(CancellationToken ct = default)
     {
         return await _context.Roles
@@ -166,5 +141,32 @@ public sealed class UserService : BaseService, IUserService
                 ConcurrencyStamp = x.ConcurrencyStamp
             })
             .ToListAsync(ct);
+    }
+
+    public async Task UpdateRolesAsync(AppUser user, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(user);
+
+        var existingUserRoles = await _context.UserRoles.Where(ur => ur.UserId == user.Id).ToListAsync(ct);
+
+        if (existingUserRoles.Count > 0)
+        {
+            _context.UserRoles.RemoveRange(existingUserRoles);
+        }
+
+        var newUserRoles = user.Roles?.Where(r => r is not null).Select(r => r.Id)
+            .Distinct().Select(roleId => new IdentityUserRole<int>
+            {
+                UserId = user.Id,
+                RoleId = roleId
+            })
+            .ToList();
+
+        if (newUserRoles is { Count: > 0 })
+        {
+            await _context.UserRoles.AddRangeAsync(newUserRoles, ct);
+        }
+
+        await _context.SaveChangesAsync(ct);
     }
 }

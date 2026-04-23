@@ -1,43 +1,50 @@
-﻿@if (UsersData is not null)
+﻿@inject IUserRepo userService
+
+@if (UsersData is not null)
 {
-    <SfGrid TValue="AppUser" Toolbar="@(new List<string> { "Search" })"
+    <SfGrid TValue="AppUser"
+            DataSource="@UsersData"
+            Toolbar="@(new List<string> { "Edit", "Update", "Cancel", "Search" })"
             AllowPaging="true"
             AllowReordering="true"
             AllowSorting="true"
             AllowFiltering="true"
-            ShowColumnMenu="true" DataSource="@UsersData">
+            ShowColumnMenu="true">
+        <GridEditSettings AllowEditing="true" Mode="EditMode.Normal"></GridEditSettings>
         <GridPageSettings PageSize="GridConstants.RowCount"></GridPageSettings>
-        <GridSearchSettings Fields="@(new[] { nameof(AppUser.UserName) })"
+        <GridSearchSettings Fields="@(new[] { nameof(AppUser.UserName), nameof(AppUser.Email), nameof(AppUser.ProviderDisplayName) })"
                             Operator="Syncfusion.Blazor.Operator.StartsWith"
                             IgnoreCase="true"
                             IgnoreAccent="true">
         </GridSearchSettings>
         <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.CheckBox" Mode="FilterBarMode.Immediate"></GridFilterSettings>
-        <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Multiple" CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
-        <GridTemplates>
-            <DetailTemplate Context="item">
-                <UserRoles User="(AppUser)item" AvailableRoles="AvailableRoles" OnRolesChanged="RefreshRequested" />
-            </DetailTemplate>
-        </GridTemplates>
         <GridColumns>
-            <GridColumn Type="ColumnType.CheckBox"
-                        AllowFiltering="false"
-                        AllowSorting="false"
-                        Width="50">
-            </GridColumn>
-            <GridColumn Field="@nameof(AppUser.UserName)" HeaderText="User name"></GridColumn>
+            <GridColumn Field="@nameof(AppUser.UserName)" HeaderText="User name" IsPrimaryKey="true" AllowEditing="false"></GridColumn>
+            <GridColumn Field="@nameof(AppUser.ProviderDisplayName)" HeaderText="Provider" AllowEditing="false"></GridColumn>
             <GridColumn Field="@nameof(AppUser.Email)" HeaderText="Email"></GridColumn>
             <GridColumn Field="@nameof(AppUser.PhoneNumber)" HeaderText="Phone number"></GridColumn>
-            <GridColumn Field="@nameof(AppUser.ProviderDisplayName)" HeaderText="Provider"></GridColumn>
-            <GridColumn Field="@nameof(AppUser.RoleNames)" HeaderText="Roles"></GridColumn>
+            <GridColumn Field="@nameof(AppUser.RoleNames)" HeaderText="Roles">
+                <Template>
+                    @{
+                        var user = (AppUser)context;
+                        <span>@string.Join(", ", user.RoleNames)</span>
+                    }
+                </Template>
+                <EditTemplate>
+                    @{
+                        var user = (AppUser)context;
+                        <SfMultiSelect TItem="AppRole" TValue="AppRole[]" DataSource="@AvailableRoles" @bind-Value="user.Roles"
+                                       Placeholder="Select roles" Mode="VisualMode.Box" ShowDropDownIcon="true"
+                                       AllowFiltering="true" ShowClearButton="true">
+                            <MultiSelectFieldSettings Text="Name" Value="Id" />
+                        </SfMultiSelect>
+                    }
+                </EditTemplate>
+            </GridColumn>
         </GridColumns>
+        <GridEvents TValue="AppUser" OnActionBegin="OnActionBegin"></GridEvents>
     </SfGrid>
 }
-<style>
-    .e-detailrow {
-        background-color: lightgray;
-    }
-</style>
 @code {
     [Parameter, EditorRequired]
     public IReadOnlyList<AppUser> UsersData { get; set; } = [];
@@ -47,4 +54,16 @@
 
     [Parameter]
     public EventCallback RefreshRequested { get; set; }
+
+    private async Task OnActionBegin(ActionEventArgs<AppUser> args)
+    {
+        if (args.RequestType == Syncfusion.Blazor.Grids.Action.Save && args.Data is not null)
+        {
+            var user = args.Data;
+
+            await userService.UpdateRolesAsync(user);
+
+            await RefreshRequested.InvokeAsync();
+        }
+    }
 }

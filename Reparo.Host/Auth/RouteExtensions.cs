@@ -250,23 +250,17 @@ internal static class RouteExtensions
             return Results.Ok(entries);
         });
 
-        group.MapPost("users/{userId:int}/roles/{roleName}", async (int userId, string roleName, [FromServices] IUserService repo, CancellationToken ct) =>
-        {
-            await repo.AddRoleToUserAsync(userId, roleName, ct);
-            return Results.NoContent();
-        });
-
-        group.MapDelete("users/{userId:int}/roles/{roleId:int}", async (int userId, int roleId, [FromServices] IUserService repo, CancellationToken ct) =>
-        {
-            await repo.RemoveRoleFromUserAsync(userId, roleId, ct);
-            return Results.NoContent();
-        });
-
         group.MapGet("roles-get", async ([FromServices] IUserService repo, CancellationToken ct) =>
         {
             var entries = await repo.GetRolesAsync(ct);
             if (entries == null) return Results.NotFound();
             return Results.Ok(entries);
+        });
+
+        group.MapPost("roles-update", async ([FromServices] IUserService repo, [FromBody] AppUser user, CancellationToken ct) =>
+        {
+            await repo.UpdateRolesAsync(user, ct);
+            return Results.Ok;
         });
 
         return group;

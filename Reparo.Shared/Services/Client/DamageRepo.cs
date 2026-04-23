@@ -20,7 +20,7 @@ public sealed class DamageRepo : IDamageRepo
         _authProvider = authProvider;
     }
 
-    public async Task<int> GetUserAsync()
+    private async Task<int> GetUserAsync()
     {
         var authState = await _authProvider.GetAuthenticationStateAsync();
         var user = authState.User;

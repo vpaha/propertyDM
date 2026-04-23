@@ -129,21 +129,16 @@ h5 {
   font-family: "Default" !important;
 }
 
-.e-speech-to-text.e-btn.e-round {
-  height: 40px;
-  width: 40px;
-}
-
 .wdr-container {
   display: flex;
   flex-flow: nowrap;
-  align-items: flex-end;
+  align-items: end;
   column-gap: 5px;
   row-gap: 0px;
 }
 
 .e-dlg-content {
-  background-color: #ced4da;
+  background-color: #DCDCDC !important;
 }
 
 .popup-dialog .e-footer-content {
@@ -151,8 +146,4 @@ h5 {
   justify-content: center;
   align-items: center;
   gap: 16px;
-}
-
-.popup-dialog-none .e-footer-content {
-  display: none !important;
 }
