@@ -3,11 +3,9 @@
 
 @inject IAuthorizationService authz
 
-<div>User: @identity?.Name</div>
-<div>Auth Type: @identity?.AuthenticationType</div>
-<div>RoleClaimType: @identity?.RoleClaimType</div>
-<div>Is Vendor: @isVendor</div>
-
+<div>User: @User.Identity?.Name</div>
+<div style="padding-bottom:24px;">Auth Type: @User.Identity?.AuthenticationType</div>
+<h3>Is Vendor: @isVendor</h3>
 @if (User?.Claims?.Any() == true)
 {
     <div>All Claims:</div>
@@ -21,15 +19,12 @@
 
 @code {
     [Parameter]
-    public ClaimsPrincipal? User { get; set; }
+    public ClaimsPrincipal User { get; set; } = default!;
 
-    private ClaimsIdentity? identity;
     private bool isVendor;
 
     protected override async Task OnParametersSetAsync()
     {
-        identity = User?.Identity as ClaimsIdentity;
-
         if (User is not null)
         {
             var result = await authz.AuthorizeAsync(User, "Vendor");
