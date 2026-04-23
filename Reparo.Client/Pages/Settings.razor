@@ -1,5 +1,5 @@
 ﻿@page "/settings"
-@attribute [Authorize]
+@attribute [AllowAnonymous]
 
 @using Microsoft.JSInterop
 @using System.Security.Claims
@@ -24,50 +24,31 @@
                 <a href="authentication/clear" class="e-btn e-primary e-outline" title="browser Cache">Clear browser Cache</a>
             </div>
         </CardContent>
-        <AuthorizeView>
-            <Authorized Context="auth">
-                <div>Authenticated: @auth.User.Identity?.IsAuthenticated</div>
-                <div>Auth type: @auth.User.Identity?.AuthenticationType</div>
-                <div>RoleClaimType: @((auth.User.Identity as ClaimsIdentity)?.RoleClaimType)</div>
-                <div>Is vendor: @auth.User.IsInRole("vendor")</div>
-
-                <ul>
-                    @foreach (var claim in auth.User.Claims)
-                    {
-                        <li>@claim.Type : @claim.Value</li>
-                    }
-                </ul>
-            </Authorized>
-        </AuthorizeView>
+        <CardContent EnableSeparator="true">
+            <div style="width: fit-content;">
+                <label for="culture-select">Language and Region:</label>
+                <SfDropDownList id="culture-select" TValue="string" TItem="CultureOption" DataSource="@cultures.Options" Value="@selected">
+                    <DropDownListFieldSettings Text="Country" Value="Culture" />
+                    <DropDownListEvents TValue="string" TItem="CultureOption" ValueChange="OnCultureChanged" />
+                </SfDropDownList>
+            </div>
+            <div style="width: fit-content;">
+                <SfDatePicker TValue="DateOnly?" Format="@CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern"
+                              Placeholder="Date format" FloatLabelType="FloatLabelType.Always" EnableMask=true>
+                    <DatePickerMaskPlaceholder Day="dd" Month="mm" Year="yyyy"></DatePickerMaskPlaceholder>
+                </SfDatePicker>
+            </div>
+            <div style="width: fit-content;">
+                <SfNumericTextBox Placeholder="Currency format" FloatLabelType="FloatLabelType.Always" TValue="Decimal?" Format="C" aria-label="Enter a currency value" Value="100"></SfNumericTextBox>
+            </div>
+        </CardContent>
         <AuthorizeView Policy="Admin">
-            <Authorized>
+            <Authorized Context="auth">
                 <CardContent EnableSeparator="true">
-                    <div style="width: fit-content;">
-                        <label for="culture-select">Language and Region:</label>
-                        <SfDropDownList id="culture-select" TValue="string" TItem="CultureOption" DataSource="@cultures.Options" Value="@selected">
-                            <DropDownListFieldSettings Text="Country" Value="Culture" />
-                            <DropDownListEvents TValue="string" TItem="CultureOption" ValueChange="OnCultureChanged" />
-                        </SfDropDownList>
-                    </div>
-                    <div style="width: fit-content;">
-                        <SfDatePicker TValue="DateOnly?" Format="@CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern"
-                                      Placeholder="Date format" FloatLabelType="FloatLabelType.Always" EnableMask=true>
-                            <DatePickerMaskPlaceholder Day="dd" Month="mm" Year="yyyy"></DatePickerMaskPlaceholder>
-                        </SfDatePicker>
-                    </div>
-                    <div style="width: fit-content;">
-                        <SfNumericTextBox Placeholder="Currency format" FloatLabelType="FloatLabelType.Always" TValue="Decimal?" Format="C" aria-label="Enter a currency value" Value="100"></SfNumericTextBox>
-                    </div>
+                    <UserInfo User="auth.User"></UserInfo>
                 </CardContent>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView>
-            <Authorized>
                 <CardContent EnableSeparator="true">
                     <UserList RefreshRequested="RefreshUsersAsync"></UserList>
-                </CardContent>
-                <CardContent EnableSeparator="true">
-                    <UserInfo></UserInfo>
                 </CardContent>
             </Authorized>
         </AuthorizeView>

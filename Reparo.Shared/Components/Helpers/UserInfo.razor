@@ -1,24 +1,43 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization;
+﻿@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
 
-<AuthorizeView>
-    <Authorized Context="auth">
-        <div>
-            <strong>User:</strong> @auth.User.Identity?.Name
-        </div>
-        <div>
-            <strong>Auth Type:</strong> @auth.User.Identity?.AuthenticationType
-        </div>
-        <h3>All Claims:</h3>
-        @if (auth.User.Claims?.Any() == true)
+@inject IAuthorizationService authz
+
+<div>User: @identity?.Name</div>
+<div>Auth Type: @identity?.AuthenticationType</div>
+<div>RoleClaimType: @identity?.RoleClaimType</div>
+<div>Is Vendor: @isVendor</div>
+
+@if (User?.Claims?.Any() == true)
+{
+    <div>All Claims:</div>
+    <ul>
+        @foreach (var claim in User.Claims.OrderBy(c => c.Type))
         {
-            <ul>
-                @foreach (var claim in auth.User.Claims.OrderBy(c => c.Type))
-                {
-                    <li>
-                        <strong>@claim.Type</strong>: @claim.Value
-                    </li>
-                }
-            </ul>
+            <li><strong>@claim.Type</strong>: @claim.Value</li>
         }
-    </Authorized>
-</AuthorizeView>
+    </ul>
+}
+
+@code {
+    [Parameter]
+    public ClaimsPrincipal? User { get; set; }
+
+    private ClaimsIdentity? identity;
+    private bool isVendor;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        identity = User?.Identity as ClaimsIdentity;
+
+        if (User is not null)
+        {
+            var result = await authz.AuthorizeAsync(User, "Vendor");
+            isVendor = result.Succeeded;
+        }
+        else
+        {
+            isVendor = false;
+        }
+    }
+}

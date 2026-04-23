@@ -4,14 +4,14 @@
     <Authorized Context="auth">
         <div id="user-container">
             @{
-                var user = auth.User;
+                var name = auth.User.Identity?.Name;
+                if (!string.IsNullOrEmpty(name))
+                {
+                    <div>
+                        Welcome, @name
+                    </div>
+                }
             }
-            <div title="@(user.IsInRole("Admin") ? "You are an Admin." : "You are a regular user.")">
-                Welcome, @user.Identity?.Name!
-            </div>
-            <div title="User ID @user.FindFirst("app_user_id")?.Value">
-                Signed in with @user.Identity?.AuthenticationType
-            </div>
         </div>
     </Authorized>
     <NotAuthorized>
