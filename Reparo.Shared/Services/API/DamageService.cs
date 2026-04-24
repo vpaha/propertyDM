@@ -6,7 +6,7 @@ public interface IDamageService
     void InvalidateCache();
 
     Task<IReadOnlyList<DamageSectionType>> ListSectionTypesAsync(CancellationToken ct = default);
-    Task<IReadOnlyList<DamageEntry>> ListDamageEntriesAsync(int userId, CancellationToken ct = default);
+    Task<IReadOnlyList<DamageEntry>> ListDamageEntriesAsync(int? userId, CancellationToken ct = default);
     Task<long> AddEntryAsync(DamageEntry entry, CancellationToken ct = default);
     Task<long> UpdateEntryAsync(DamageEntry entry, CancellationToken ct = default);
 }
@@ -32,11 +32,11 @@ public sealed class DamageService : IDamageService
 
     public void InvalidateCache() => _cache.Remove(CacheKey);
 
-    public async Task<IReadOnlyList<DamageEntry>> ListDamageEntriesAsync(int userId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<DamageEntry>> ListDamageEntriesAsync(int? userId, CancellationToken ct = default)
     {
         var list = await _context.DamageEntries
                 .AsNoTracking()
-                .Where(e => e.UserId == userId)
+                .Where(e => !userId.HasValue || e.UserId == userId.Value)
                 .Include(e => e.Sections)
                     .ThenInclude(s => s.DamageSectionType)
                 .AsSplitQuery()

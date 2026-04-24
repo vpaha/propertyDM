@@ -179,7 +179,6 @@
         {
             DamageContext.DateOfLoss = DateTime.UtcNow;
             DamageContext.IsProcessed = false;
-            DamageContext.UserId = 1;
 
             IReadOnlyList<DamageSectionType> types = await damageRepo.ListSectionTypesAsync(CancellationToken.None);
 

@@ -62,8 +62,8 @@ public class DamageEntry : IValidatableObject
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 
-    public int UserId { get; set; }
-    public AppUser User { get; set; } = default!;
+    public int? UserId { get; set; }
+    public AppUser? User { get; set; } = default!;
 
     public int? VendorId { get; set; }
     public VendorModel? Vendor { get; set; } = default!;

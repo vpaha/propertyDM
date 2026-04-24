@@ -20,19 +20,18 @@ public sealed class DamageRepo : IDamageRepo
         _authProvider = authProvider;
     }
 
-    private async Task<int> ResolveUserIdAsync()
+    private async Task<int?> ResolveUserIdAsync()
     {
         var authState = await _authProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        var userId = 1;
         if (user.Identity?.IsAuthenticated == true)
         {
             var appUserId = user.FindFirst("app_user_id")?.Value;
-            if (!string.IsNullOrWhiteSpace(appUserId) && int.TryParse(appUserId, out var parsedUserId)) userId = parsedUserId;
+            if (!string.IsNullOrWhiteSpace(appUserId) && int.TryParse(appUserId, out var parsedUserId)) return parsedUserId;
         }
 
-        return userId;
+        return null;
     }
 
     public async Task<IReadOnlyList<DamageSectionType>> ListSectionTypesAsync(CancellationToken ct = default)
@@ -44,13 +43,15 @@ public sealed class DamageRepo : IDamageRepo
     public async Task<IReadOnlyList<DamageEntry>> ListDamageEntriesAsync(CancellationToken ct = default)
     {
         var userId = await ResolveUserIdAsync();
-        var list = await _http.GetFromJsonAsync<IReadOnlyList<DamageEntry>>($"damage/damage-entries?userId={userId}", ct);
+        var url = userId.HasValue ? $"damage/damage-entries?userId={userId.Value}" : "damage/damage-entries";
+        var list = await _http.GetFromJsonAsync<IReadOnlyList<DamageEntry>>(url, ct);
         return list ?? Array.Empty<DamageEntry>();
     }
 
     public async Task<long> AddEntryAsync(DamageEntry entry, CancellationToken ct = default)
     {
-        entry.UserId = await ResolveUserIdAsync();
+        var userId = await ResolveUserIdAsync();
+        if (userId is not null) entry.UserId = userId.Value;
 
         var response = await _http.PostAsJsonAsync("damage/damage-add", entry, ct);
         response.EnsureSuccessStatusCode();

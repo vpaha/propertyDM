@@ -56,8 +56,8 @@ internal static class ModelBuilderExtensions
                 .HasForeignKey(x => x.DamageEntryId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            e.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId).IsRequired();
-            e.HasOne(d => d.Vendor).WithMany().HasForeignKey(d => d.VendorId);
+            e.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId).IsRequired(false);
+            e.HasOne(d => d.Vendor).WithMany().HasForeignKey(d => d.VendorId).IsRequired(false);
         });
 
         modelBuilder.Entity<DamageEntrySection>(e =>
