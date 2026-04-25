@@ -1,0 +1,13 @@
+﻿@page "/vendorprofile"
+@attribute [Authorize(Policy = "Vendor")]
+
+<PageTitle>Vendor Profile | Property Claims</PageTitle>
+
+<Reparo.Shared.Components.Submission.Vendor PlaceId="@PlaceId" />
+@code {
+    public string? PlaceId { get; set; }
+    protected override void OnInitialized()
+    {
+        
+    }
+}

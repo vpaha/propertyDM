@@ -3,16 +3,28 @@
         <div>
             <a href="" class="e-btn e-primary e-outline" title="Home page">Home</a>
         </div>
-        <div>
-            <a href="damage" class="e-btn e-primary e-outline" title="Damage Report">Damage Report</a>
-        </div>
-        <div>
-            <a href="tracking" class="e-btn e-primary e-outline" title="Damage Tracking">Tracking</a>
-        </div>
+        <AuthorizeView Policy="Vendor">
+            <Authorized>
+                <div>
+                    <a href="repairrequests" class="e-btn e-primary e-outline" title="Repair Requests">Requests</a>
+                </div>
+                <div>
+                    <a href="vendorprofile" class="e-btn e-primary e-outline" title="Vendor Profile">My Profile</a>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div>
+                    <a href="damage" class="e-btn e-primary e-outline" title="Damage Report">Damage Report</a>
+                </div>
+                <div>
+                    <a href="tracking" class="e-btn e-primary e-outline" title="Damage Tracking">Tracking</a>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
         <AuthorizeView>
             <NotAuthorized>
                 <div>
-                    <a href="claim" class="e-btn e-primary e-outline" title="sign in">Sign in</a>
+                    <a href="vendorprofile" class="e-btn e-primary e-outline" title="sign in">Sign in</a>
                 </div>
             </NotAuthorized>
         </AuthorizeView>

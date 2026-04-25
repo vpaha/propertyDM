@@ -24,13 +24,11 @@ public sealed class DamageRepo : IDamageRepo
     {
         var authState = await _authProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-
         if (user.Identity?.IsAuthenticated == true)
         {
             var appUserId = user.FindFirst("app_user_id")?.Value;
             if (!string.IsNullOrWhiteSpace(appUserId) && int.TryParse(appUserId, out var parsedUserId)) return parsedUserId;
         }
-
         return null;
     }
 

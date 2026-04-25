@@ -56,6 +56,8 @@ public sealed class UserService : BaseService, IUserService
 
         if (principal.Identity is ClaimsIdentity identity)
         {
+            identity.AddClaim(new Claim("app_user_id", userId.Value.ToString()));
+
             foreach (var claim in identity.FindAll(identity.RoleClaimType).ToList()) identity.RemoveClaim(claim);
             foreach (var role in roleNames) identity.AddClaim(new Claim(identity.RoleClaimType, role));
         }

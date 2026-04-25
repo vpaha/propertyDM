@@ -46,7 +46,7 @@ public static class AuthExtensions
                         if (principal is null)
                             throw new InvalidOperationException("Principal is not available.");
 
-                        await ProvisionUserAsync(ctx.HttpContext, principal, ctx.HttpContext.RequestAborted);
+                        await ProvisionAsync(ctx.HttpContext, principal, ctx.HttpContext.RequestAborted);
                     }
                 };
             })
@@ -67,7 +67,7 @@ public static class AuthExtensions
                         if (principal is null)
                             throw new InvalidOperationException("Principal is not available.");
 
-                        await ProvisionUserAsync(ctx.HttpContext, principal, ctx.HttpContext.RequestAborted);
+                        await ProvisionAsync(ctx.HttpContext, principal, ctx.HttpContext.RequestAborted);
                     }
                 };
             })
@@ -93,7 +93,7 @@ public static class AuthExtensions
                         if (principal is null)
                             throw new InvalidOperationException("Principal is not available.");
 
-                        await ProvisionUserAsync(ctx.HttpContext, principal, ctx.HttpContext.RequestAborted);
+                        await ProvisionAsync(ctx.HttpContext, principal, ctx.HttpContext.RequestAborted);
                     }
                 };
             })
@@ -133,7 +133,7 @@ public static class AuthExtensions
                         if (principal is null)
                             throw new InvalidOperationException("Principal is not available.");
 
-                        await ProvisionUserAsync(ctx.HttpContext, principal, ctx.HttpContext.RequestAborted);
+                        await ProvisionAsync(ctx.HttpContext, principal, ctx.HttpContext.RequestAborted);
                     }
                 };
             });
@@ -157,7 +157,7 @@ public static class AuthExtensions
         foreach (var scope in scopes) options.Scope.Add(scope);
     }
 
-    private static async Task ProvisionUserAsync(
+    private static async Task ProvisionAsync(
         HttpContext httpContext,
         ClaimsPrincipal principal,
         CancellationToken cancellationToken)
