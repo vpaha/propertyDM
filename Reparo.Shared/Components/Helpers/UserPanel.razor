@@ -1,25 +1,33 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization;
 
-<AuthorizeView>
-    <Authorized Context="auth">
-        <div id="user-container">
-            @{
-                var name = auth.User.Identity?.Name;
-                if (!string.IsNullOrEmpty(name))
-                {
-                    <div>
-                        Welcome, @name
-                    </div>
+<div id="user-container">
+    <AuthorizeView>
+        <Authorized Context="auth">
+            <div>
+                @{
+                    var name = auth.User.Identity?.Name;
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        <div>
+                            Welcome, @name
+                        </div>
+                    }
                 }
-            }
-        </div>
-    </Authorized>
-    <NotAuthorized>
-        <div>
-            Welcome, guest!
-        </div>
-    </NotAuthorized>
-</AuthorizeView>
+            </div>
+            <div>
+                <a href="authentication/signout" class="e-btn e-info e-outline">Sign Out</a>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            <div>
+                Welcome, guest!
+            </div>
+            <div>
+                <a href="claim" class="e-btn e-info e-outline">Sign in</a>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
 <style>
     #user-container {
         display: flex;

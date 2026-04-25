@@ -1,14 +1,24 @@
 ﻿@page "/vendorprofile"
 @attribute [Authorize(Policy = "Vendor")]
+@inject IDamageRepo damageRepo
 
 <PageTitle>Vendor Profile | Property Claims</PageTitle>
 
-@UserId
-xxxxxxxxxx
+<div>
+        @if (damageList != null)
+        {
+            foreach (var item in damageList)
+            {
+                //<DamageInfo DamageContext="@item" OnToggleBladeEvent="ToggleBlade" IsBladeOpen="isSideBarOpen"></DamageInfo>
+                <div>zzzzz</div>
+            }
+        }
+</div>
 @code {
-    public string? UserId { get; set; }
-    protected override void OnInitialized()
+    IReadOnlyList<DamageEntry> damageList { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
     {
-        UserId = "xxxxxxxxxx";
+        damageList = await damageRepo.ListDamageEntriesAsync(CancellationToken.None);
     }
 }
