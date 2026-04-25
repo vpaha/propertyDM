@@ -56,6 +56,8 @@ public sealed class UserService : BaseService, IUserService
 
         if (principal.Identity is ClaimsIdentity identity)
         {
+            var existing = identity.FindFirst("app_user_id");
+            if (existing is not null) identity.RemoveClaim(existing);
             identity.AddClaim(new Claim("app_user_id", userId.Value.ToString()));
 
             foreach (var claim in identity.FindAll(identity.RoleClaimType).ToList()) identity.RemoveClaim(claim);

@@ -16,13 +16,13 @@ internal static class IdentityModelBuilderExtensions
             e.Property(x => x.LockoutEnd).HasColumnType("timestamp with time zone");
 
             e.Property(x => x.VendorId)
-                .HasColumnName("vendor_id");
+                .HasColumnName("Vendor_id").IsRequired(false);
 
             e.HasOne<VendorModel>()
                 .WithMany()
                 .HasForeignKey(x => x.VendorId)
                 .HasConstraintName("fk_aspnet_users_vendors_vendor_id")
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.SetNull).IsRequired(false);
         });
 
         modelBuilder.Entity<AppRole>(e =>
