@@ -14,6 +14,15 @@ internal static class IdentityModelBuilderExtensions
             e.Property(x => x.Email).HasColumnName("Email");
             e.Property(x => x.PhoneNumber).HasColumnName("PhoneNumber");
             e.Property(x => x.LockoutEnd).HasColumnType("timestamp with time zone");
+
+            e.Property(x => x.VendorId)
+                .HasColumnName("vendor_id");
+
+            e.HasOne<VendorModel>()
+                .WithMany()
+                .HasForeignKey(x => x.VendorId)
+                .HasConstraintName("fk_aspnet_users_vendors_vendor_id")
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<AppRole>(e =>

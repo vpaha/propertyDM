@@ -3,6 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 public sealed class AppUser : IdentityUser<int>
 {
+    public int? VendorId { get; set; }
+
     [NotMapped]
     public string? ProviderDisplayName { get; set; }
 
