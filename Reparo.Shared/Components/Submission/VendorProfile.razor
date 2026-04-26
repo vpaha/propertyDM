@@ -138,9 +138,6 @@
 </style>
 
 @code {
-    [Parameter]
-    public int? VendorId { get; set; }
-
     private VendorModel? model { get; set; }
     private bool isLoading { get; set; } = true;
 
@@ -158,15 +155,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (!VendorId.HasValue) return;
-
         isLoading = true;
         try
         {
-            model = await vendorRepo.GetVendorByVendorIdAsync(VendorId.Value);
-            if (model is not null)
-            {
-            }
+            model = await vendorRepo.GetVendorAsync();
         } catch (Exception)
         {
         } finally

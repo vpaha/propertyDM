@@ -270,7 +270,7 @@
     {
         try
         {
-            DamageState.Context.Vendor = await vendorRepo.GetVendorByPlaceIdAsync(placeId);
+            DamageState.Context.Vendor = await vendorRepo.GetVendorAsync(placeId);
             DamageState.Context.VendorId = DamageState.Context.Vendor?.Id;
         } catch (Exception)
         {

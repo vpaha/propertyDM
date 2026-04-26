@@ -8,11 +8,11 @@ public interface IUserRepo
     Task UpdateRolesAsync(AppUser user, CancellationToken ct = default);
 }
 
-public sealed class UserRepo : IUserRepo
+public sealed class UserRepo : BaseRepo, IUserRepo
 {
     private readonly HttpClient _http;
 
-    public UserRepo(HttpClient http, AuthenticationStateProvider authProvider)
+    public UserRepo(HttpClient http, AuthenticationStateProvider authProvider) : base(authProvider)
     {
         _http = http;
     }

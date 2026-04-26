@@ -4,16 +4,17 @@ using Microsoft.AspNetCore.Components.Authorization;
 public interface IDamageRepo
 {
     Task<IReadOnlyList<DamageSectionType>> ListSectionTypesAsync(CancellationToken ct = default);
-    Task<IReadOnlyList<DamageEntry>> ListDamageEntriesAsync(bool isVendor, CancellationToken ct = default);
+    Task<IReadOnlyList<DamageEntry>> ListDamageUserEntriesAsync(CancellationToken ct = default);
+    Task<IReadOnlyList<DamageEntry>> ListDamageVendorEntriesAsync(CancellationToken ct = default);
     Task<long> AddEntryAsync(DamageEntry entry, CancellationToken ct = default);
     Task<long> UpdateEntryAsync(DamageEntry entry, CancellationToken ct = default);
 }
 
-public sealed class DamageRepo : IDamageRepo
+public sealed class DamageRepo : BaseRepo, IDamageRepo
 {
     private readonly HttpClient _http;
 
-    public DamageRepo(HttpClient http)
+    public DamageRepo(HttpClient http, AuthenticationStateProvider authProvider) : base(authProvider)
     {
         _http = http;
     }
@@ -24,19 +25,15 @@ public sealed class DamageRepo : IDamageRepo
         return list ?? Array.Empty<DamageSectionType>();
     }
 
-    public async Task<IReadOnlyList<DamageEntry>> ListDamageEntriesAsync(bool isVendor, CancellationToken ct = default)
+    public async Task<IReadOnlyList<DamageEntry>> ListDamageUserEntriesAsync(CancellationToken ct = default)
     {
-        int? userId = null;
-        int? vendorId = null;
-
-        if (isVendor) vendorId = await ResolveVendorIdAsync();
-        else userId = await ResolveUserIdAsync();
-
-        var url = isVendor && vendorId.HasValue ? $"damage/damage-entries?vendorId={vendorId.Value}" : userId.HasValue
-        ? $"damage/damage-entries?userId={userId.Value}"
-        : "damage/damage-entries";
-
         var list = await _http.GetFromJsonAsync<IReadOnlyList<DamageEntry>>("damage/damage-user-entries", ct);
+        return list ?? Array.Empty<DamageEntry>();
+    }
+
+    public async Task<IReadOnlyList<DamageEntry>> ListDamageVendorEntriesAsync(CancellationToken ct = default)
+    {
+        var list = await _http.GetFromJsonAsync<IReadOnlyList<DamageEntry>>("damage/damage-vendor-entries", ct);
         return list ?? Array.Empty<DamageEntry>();
     }
 

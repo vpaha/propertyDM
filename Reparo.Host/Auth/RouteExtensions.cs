@@ -218,9 +218,15 @@ internal static class RouteExtensions
             return result;
         });
 
-        group.MapGet("damage-entries", async ([FromServices] IDamageService repo, [FromQuery] int? userId, [FromQuery] int? vendorId, CancellationToken ct) =>
+        group.MapGet("damage-user-entries", async ([FromServices] IDamageService repo, [FromQuery] int? userId, CancellationToken ct) =>
         {
-            var entries = await repo.ListDamageEntriesAsync(userId, vendorId, ct);
+            var entries = await repo.ListDamageUserEntriesAsync(userId, ct);
+            return Results.Ok(entries);
+        });
+
+        group.MapGet("damage-vendor-entries", async ([FromServices] IDamageService repo, [FromQuery] int? vendorId, CancellationToken ct) =>
+        {
+            var entries = await repo.ListDamageVendorEntriesAsync(vendorId, ct);
             return Results.Ok(entries);
         });
 
@@ -236,12 +242,15 @@ internal static class RouteExtensions
             return Results.Ok(id);
         });
 
-        group.MapGet("vendor-get", async ([FromServices] IVendorService repo, [FromQuery] string placeid, CancellationToken ct) =>
-        {
-            var entries = await repo.GetVendorByPlaceIdAsync(placeid, ct);
-            if (entries == null) return Results.NotFound();
-            return Results.Ok(entries);
-        });
+        //group.MapGet("vendor-get", async ([FromServices] IVendorService repo, [FromQuery] string? placeid, CancellationToken ct) =>
+        //{
+        //    if(!placeid.hasValue) var entries = await repo.GetVendorAsync(placeid, ct);
+        //    else var entries = await repo.GetVendorAsync(null, int.Parse(placeid.Value), ct);
+            
+        //    if (entries == null) return Results.NotFound();
+
+        //    return Results.Ok(entries);
+        //});
 
         group.MapGet("user-list-get", async ([FromServices] IUserService repo, CancellationToken ct) =>
         {

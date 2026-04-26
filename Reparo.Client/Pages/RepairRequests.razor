@@ -17,6 +17,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        damageList = await damageRepo.ListDamageEntriesAsync(true, CancellationToken.None);
+        damageList = await damageRepo.ListDamageVendorEntriesAsync(CancellationToken.None);
     }
 }

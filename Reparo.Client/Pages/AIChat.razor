@@ -77,7 +77,7 @@
             string summaries = string.Empty;
             if (isDamageIncluded)
             {
-                var DamageList = await damageRepo.ListDamageEntriesAsync(false, CancellationToken.None);
+                var DamageList = await damageRepo.ListDamageUserEntriesAsync(CancellationToken.None);
                 summaries = string.Join(". ", DamageList.Select(d => d.BuildCombinedDescription()).Where(s => !string.IsNullOrWhiteSpace(s)));
             }
 

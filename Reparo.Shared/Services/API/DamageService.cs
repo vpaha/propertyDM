@@ -6,7 +6,8 @@ public interface IDamageService
     void InvalidateCache();
 
     Task<IReadOnlyList<DamageSectionType>> ListSectionTypesAsync(CancellationToken ct = default);
-    Task<IReadOnlyList<DamageEntry>> ListDamageEntriesAsync(int? userId, int? vendorId, CancellationToken ct = default);
+    Task<IReadOnlyList<DamageEntry>> ListDamageUserEntriesAsync(int? userId, CancellationToken ct = default);
+    Task<IReadOnlyList<DamageEntry>> ListDamageVendorEntriesAsync(int? vendorId, CancellationToken ct = default);
     Task<long> AddEntryAsync(DamageEntry entry, CancellationToken ct = default);
     Task<long> UpdateEntryAsync(DamageEntry entry, CancellationToken ct = default);
 }
@@ -32,11 +33,25 @@ public sealed class DamageService : IDamageService
 
     public void InvalidateCache() => _cache.Remove(CacheKey);
 
-    public async Task<IReadOnlyList<DamageEntry>> ListDamageEntriesAsync(int? userId, int? vendorId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<DamageEntry>> ListDamageUserEntriesAsync(int? userId, CancellationToken ct = default)
     {
         var list = await _context.DamageEntries
                 .AsNoTracking()
-                .Where(e => (!userId.HasValue || e.UserId == userId.Value) && (!vendorId.HasValue || e.VendorId == vendorId.Value))
+                .Where(e => (!userId.HasValue || e.UserId == userId.Value))
+                .Include(e => e.Sections)
+                    .ThenInclude(s => s.DamageSectionType)
+                .AsSplitQuery()
+                .OrderByDescending(e => e.CreatedAt)
+                .ToListAsync(ct);
+
+        return list;
+    }
+
+    public async Task<IReadOnlyList<DamageEntry>> ListDamageVendorEntriesAsync(int? vendorId, CancellationToken ct = default)
+    {
+        var list = await _context.DamageEntries
+                .AsNoTracking()
+                .Where(e => (!vendorId.HasValue || e.VendorId == vendorId.Value))
                 .Include(e => e.Sections)
                     .ThenInclude(s => s.DamageSectionType)
                 .AsSplitQuery()
