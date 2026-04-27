@@ -13,6 +13,38 @@ internal static class RouteExtensions
 {
     public sealed record ThemeCookieDto(string ThemeName, bool IsDarkMode, string Culture);
 
+    private static bool IsAllowedProvider(string provider) =>
+        string.Equals(provider, OpenIdConnectDefaults.AuthenticationScheme, StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(provider, "Google", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(provider, "Twitter", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(provider, "Facebook", StringComparison.OrdinalIgnoreCase);
+
+    private static LocationDto parseResponse(GeocodeResult response)
+    {
+        string? country = null;
+        string? state = null;
+        string? city = null;
+
+        foreach (var component in response.AddressComponents)
+        {
+            if (component.Types == null) continue;
+
+            if (component.Types.Contains("country")) country = component.ShortName;
+            if (component.Types.Contains("administrative_area_level_1")) state = component.ShortName;
+            if (component.Types.Contains("locality")) city = component.LongName;
+        }
+
+        return new LocationDto
+        {
+            Address = response.FormattedAddress,
+            PlaceId = response.PlaceId,
+            Latitude = response.Geometry?.Location?.Latitude ?? 0,
+            Longitude = response.Geometry?.Location?.Longitude ?? 0,
+            Placename = city + ", " + state,
+            Region = (country != null && state != null) ? $"{country}-{state}" : null
+        };
+    }
+
     internal static IEndpointConventionBuilder MapLoginAndLogout(this RouteGroupBuilder group)
     {
         group.MapPost("signin", (HttpContext context,
@@ -52,12 +84,6 @@ internal static class RouteExtensions
         });
         return group;
     }
-
-    private static bool IsAllowedProvider(string provider) =>
-        string.Equals(provider, OpenIdConnectDefaults.AuthenticationScheme, StringComparison.OrdinalIgnoreCase) ||
-        string.Equals(provider, "Google", StringComparison.OrdinalIgnoreCase) ||
-        string.Equals(provider, "Twitter", StringComparison.OrdinalIgnoreCase) ||
-        string.Equals(provider, "Facebook", StringComparison.OrdinalIgnoreCase);
 
     internal static IEndpointConventionBuilder MapGoogleMapEndpoints(this RouteGroupBuilder group, string googleAPIKey)
     {
@@ -99,33 +125,7 @@ internal static class RouteExtensions
         return group;
     }
 
-    private static LocationDto parseResponse(GeocodeResult response)
-    {
-        string? country = null;
-        string? state = null;
-        string? city = null;
-
-        foreach (var component in response.AddressComponents)
-        {
-            if (component.Types == null) continue;
-
-            if (component.Types.Contains("country")) country = component.ShortName;
-            if (component.Types.Contains("administrative_area_level_1")) state = component.ShortName;
-            if (component.Types.Contains("locality")) city = component.LongName;
-        }
-
-        return new LocationDto
-        {
-            Address = response.FormattedAddress,
-            PlaceId = response.PlaceId,
-            Latitude = response.Geometry?.Location?.Latitude ?? 0,
-            Longitude = response.Geometry?.Location?.Longitude ?? 0,
-            Placename = city + ", " + state,
-            Region = (country != null && state != null) ? $"{country}-{state}" : null
-        };
-    }
-
-    internal static IEndpointConventionBuilder MapConfig(this RouteGroupBuilder group)
+    internal static IEndpointConventionBuilder MapUserSettingsEndpoints(this RouteGroupBuilder group)
     {
         group.MapPost("theme", async (HttpContext ctx) =>
         {
@@ -175,71 +175,7 @@ internal static class RouteExtensions
         return group;
     }
 
-    //internal static IEndpointConventionBuilder MapPayment(this RouteGroupBuilder group)
-    //{
-    //    group.MapPost("create-checkout-session", async (StripeClient client) =>
-    //    {
-    //        var domain = "http://localhost:4242";
-    //        var options = new SessionCreateOptions
-    //        {
-    //            LineItems = [
-    //                new SessionLineItemOptions{
-    //                    Price = "{{PRICE_ID}}",
-    //                    Quantity = 1,
-    //            }],
-    //            Mode = "payment",
-    //            SuccessUrl = $"{domain}/success.html",
-    //        };
-
-    //        var service = new SessionService(client);
-    //        Session session = await service.CreateAsync(options);
-    //        return Results.Redirect(session.Url, permanent: false);
-    //    });
-    //    return group;
-    //}
-
-    internal static IEndpointConventionBuilder MapAuthorizedEndpoints(this RouteGroupBuilder group)
-    {
-        group.MapGet("damage-entries", async (HttpContext http, [FromServices] IDamageService repo, CancellationToken ct) =>
-        {
-            var vendorId = http.User.GetVendorId();
-            if (vendorId is null) return Results.Unauthorized();
-
-            var entries = await repo.ListDamageVendorEntriesAsync(vendorId, ct);
-            return Results.Ok(entries);
-        }).RequireAuthorization("Vendor");
-
-        group.MapGet("vendor-get", async (HttpContext http, [FromServices] IVendorService repo, CancellationToken ct) =>
-        {
-            var vendorId = http.User.GetVendorId();
-            var vendor = await repo.GetVendorAsync(null, vendorId, ct);
-            return vendor is null ? Results.NotFound() : Results.Ok(vendor);
-        }).RequireAuthorization("Vendor");
-
-        group.MapGet("user-list", async ([FromServices] IUserService repo, CancellationToken ct) =>
-        {
-            var entries = await repo.GetUsersAsync(ct);
-            if (entries == null) return Results.NotFound();
-            return Results.Ok(entries);
-        }).RequireAuthorization("Admin");
-
-        group.MapGet("roles-get", async ([FromServices] IUserService repo, CancellationToken ct) =>
-        {
-            var entries = await repo.GetRolesAsync(ct);
-            if (entries == null) return Results.NotFound();
-            return Results.Ok(entries);
-        }).RequireAuthorization("Admin");
-
-        group.MapPost("roles-update", async ([FromServices] IUserService repo, [FromBody] AppUser user, CancellationToken ct) =>
-        {
-            await repo.UpdateRolesAsync(user, ct);
-            return Results.Ok();
-        }).RequireAuthorization("Admin");
-
-        return group;
-    }
-
-    internal static IEndpointConventionBuilder MapPublicEndpoints(this RouteGroupBuilder group)
+    internal static IEndpointConventionBuilder MapDamageEndpoints(this RouteGroupBuilder group)
     {
         group.MapGet("damage-sections", async ([FromServices] IDamageService repo, CancellationToken ct) =>
         {
@@ -289,6 +225,70 @@ internal static class RouteExtensions
             var vendor = await repo.GetVendorAsync(placeId, null, ct);
             return vendor is null ? Results.NotFound() : Results.Ok(vendor);
         });
+
+        return group;
+    }
+
+    //internal static IEndpointConventionBuilder MapPayment(this RouteGroupBuilder group)
+    //{
+    //    group.MapPost("create-checkout-session", async (StripeClient client) =>
+    //    {
+    //        var domain = "http://localhost:4242";
+    //        var options = new SessionCreateOptions
+    //        {
+    //            LineItems = [
+    //                new SessionLineItemOptions{
+    //                    Price = "{{PRICE_ID}}",
+    //                    Quantity = 1,
+    //            }],
+    //            Mode = "payment",
+    //            SuccessUrl = $"{domain}/success.html",
+    //        };
+
+    //        var service = new SessionService(client);
+    //        Session session = await service.CreateAsync(options);
+    //        return Results.Redirect(session.Url, permanent: false);
+    //    });
+    //    return group;
+    //}
+
+    internal static IEndpointConventionBuilder MapVendorEndpoints(this RouteGroupBuilder group)
+    {
+        group.MapGet("repair-requests", async (HttpContext http, [FromServices] IDamageService repo, CancellationToken ct) =>
+        {
+            var vendorId = http.User.GetVendorId();
+            if (vendorId is null) return Results.Unauthorized();
+
+            var entries = await repo.ListDamageVendorEntriesAsync(vendorId, ct);
+            return Results.Ok(entries);
+        }).RequireAuthorization("Vendor");
+
+        group.MapGet("vendor-profile", async (HttpContext http, [FromServices] IVendorService repo, CancellationToken ct) =>
+        {
+            var vendorId = http.User.GetVendorId();
+            var vendor = await repo.GetVendorAsync(null, vendorId, ct);
+            return vendor is null ? Results.NotFound() : Results.Ok(vendor);
+        }).RequireAuthorization("Vendor");
+
+        group.MapGet("user-list", async ([FromServices] IUserService repo, CancellationToken ct) =>
+        {
+            var entries = await repo.GetUsersAsync(ct);
+            if (entries == null) return Results.NotFound();
+            return Results.Ok(entries);
+        }).RequireAuthorization("Admin");
+
+        group.MapGet("roles-get", async ([FromServices] IUserService repo, CancellationToken ct) =>
+        {
+            var entries = await repo.GetRolesAsync(ct);
+            if (entries == null) return Results.NotFound();
+            return Results.Ok(entries);
+        }).RequireAuthorization("Admin");
+
+        group.MapPost("roles-update", async ([FromServices] IUserService repo, [FromBody] AppUser user, CancellationToken ct) =>
+        {
+            await repo.UpdateRolesAsync(user, ct);
+            return Results.Ok();
+        }).RequireAuthorization("Admin");
 
         return group;
     }

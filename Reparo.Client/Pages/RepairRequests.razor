@@ -1,6 +1,7 @@
-﻿@page "/repairrequests"
+﻿@page "/vendor/requests"
 @attribute [Authorize(Policy = "Vendor")]
 @inject IVendorRepo vendorRepo
+@inject ToastService toastService
 
 <PageTitle>Repair Requests | Property Claims</PageTitle>
 <section>
@@ -17,6 +18,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        damageList = await vendorRepo.ListDamageVendorEntriesAsync(CancellationToken.None);
+        try
+        {
+            damageList = await vendorRepo.ListDamageVendorEntriesAsync(CancellationToken.None);
+        } catch (Exception ex)
+        {
+            toastService.ShowError(ex.Message);
+        }
     }
 }

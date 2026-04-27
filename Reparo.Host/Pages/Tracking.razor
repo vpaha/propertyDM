@@ -140,8 +140,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        damageList = await damageRepo.ListDamageUserEntriesAsync(CancellationToken.None);
-        isRunProcessed = false;
+        try
+        {
+            damageList = await damageRepo.ListDamageUserEntriesAsync(CancellationToken.None);
+        } catch (Exception ex)
+        {
+            toastService.ShowError(ex.Message);
+        } finally
+        {
+            isRunProcessed = false;
+        }
     }
 
     private async Task ToggleBlade(DamageEntry damage)

@@ -36,7 +36,7 @@
         isLoading = true;
         try
         {
-            model = await vendorRepo.GetVendorAsync(PlaceId);
+            model = await vendorRepo.GetVendorByPlaceAsync(PlaceId);
             if (model is not null)
             {
                 DamageState.Context.Vendor = model;

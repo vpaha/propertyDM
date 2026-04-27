@@ -1,6 +1,8 @@
-﻿@page "/vendorprofile"
+﻿@page "/vendor"
+@page "/vendor/profile"
 @attribute [Authorize(Policy = "Vendor")]
 @inject IVendorRepo vendorRepo
+@inject ToastService toastService
 
 <PageTitle>Vendor Profile | Property Claims</PageTitle>
 
@@ -12,6 +14,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        model = await vendorRepo.GetVendorAsync();
+        try
+        {
+            model = await vendorRepo.GetVendorAsync();
+        } catch (Exception ex)
+        {
+            toastService.ShowError(ex.Message);
+        }
     }
 }

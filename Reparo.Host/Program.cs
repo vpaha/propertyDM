@@ -241,10 +241,10 @@ public partial class Program
     private void MapEndpoints(WebApplication app, string googleApiKey)
     {
         app.MapGroup("authentication").MapLoginAndLogout();
-        app.MapGroup("config").MapConfig().DisableAntiforgery();
+        app.MapGroup("config").MapUserSettingsEndpoints().DisableAntiforgery();
         app.MapGroup("googlemap").MapGoogleMapEndpoints(googleApiKey);
-        app.MapGroup("damage").MapPublicEndpoints();
-        app.MapGroup("vendor").MapAuthorizedEndpoints().RequireAuthorization();
+        app.MapGroup("damage").MapDamageEndpoints();
+        app.MapGroup("vendor").MapVendorEndpoints().RequireAuthorization();
 //        app.MapGroup("pay").MapPayment().RequireAuthorization();
     }
 
