@@ -170,8 +170,11 @@ public partial class Program
         });
         builder.Services.AddTransient<TokenHandler>();
 
-        builder.Services.AddHttpClient<IClaimService, ClaimService>(client =>
+        builder.Services.AddHttpClient<IClaimService, ClaimService>((sp, client) =>
         {
+            var ctx = sp.GetRequiredService<IHttpContextAccessor>().HttpContext ?? throw new InvalidOperationException("HttpContext is not available (request scope required).");
+            if (ctx.Request.Headers.TryGetValue("Cookie", out var cookie)) client.DefaultRequestHeaders.Add("Cookie", cookie.ToString());
+
             client.BaseAddress = new Uri(claimUri);
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
