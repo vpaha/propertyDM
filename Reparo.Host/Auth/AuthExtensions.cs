@@ -169,3 +169,18 @@ public static class AuthExtensions
         await provisioner.ProvisionAsync(principal, cancellationToken);
     }
 }
+
+public static class PrincipalExtensions
+{
+    public static int? GetVendorId(this ClaimsPrincipal user)
+    {
+        var value = user.FindFirst("vendor_id")?.Value;
+        return int.TryParse(value, out var id) ? id : null;
+    }
+
+    public static int? GetUserId(this ClaimsPrincipal user)
+    {
+        var value = user.FindFirst("app_user_id")?.Value;
+        return int.TryParse(value, out var id) ? id : null;
+    }
+}

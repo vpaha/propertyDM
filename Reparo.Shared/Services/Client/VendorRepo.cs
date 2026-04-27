@@ -7,11 +7,11 @@ public interface IVendorRepo
     Task<VendorModel?> GetVendorAsync(string placeId, CancellationToken cancellationToken = default);
 }
 
-public sealed class VendorRepo : BaseRepo, IVendorRepo
+public sealed class VendorRepo : IVendorRepo
 {
     private readonly HttpClient _http;
 
-    public VendorRepo(HttpClient http, AuthenticationStateProvider authProvider) : base(authProvider)
+    public VendorRepo(HttpClient http)
     {
         _http = http;
     }

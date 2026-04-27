@@ -1,5 +1,4 @@
 ﻿using System.Net.Http.Json;
-using Microsoft.AspNetCore.Components.Authorization;
 
 public interface IDamageRepo
 {
@@ -10,11 +9,11 @@ public interface IDamageRepo
     Task<long> UpdateEntryAsync(DamageEntry entry, CancellationToken ct = default);
 }
 
-public sealed class DamageRepo : BaseRepo, IDamageRepo
+public sealed class DamageRepo : IDamageRepo
 {
     private readonly HttpClient _http;
 
-    public DamageRepo(HttpClient http, AuthenticationStateProvider authProvider) : base(authProvider)
+    public DamageRepo(HttpClient http)
     {
         _http = http;
     }
@@ -39,22 +38,15 @@ public sealed class DamageRepo : BaseRepo, IDamageRepo
 
     public async Task<long> AddEntryAsync(DamageEntry entry, CancellationToken ct = default)
     {
-        var userId = await ResolveUserIdAsync();
-        if (userId is not null) entry.UserId = userId.Value;
-
         var response = await _http.PostAsJsonAsync("damage/damage-add", entry, ct);
         response.EnsureSuccessStatusCode();
-
-        var id = await response.Content.ReadFromJsonAsync<long>(cancellationToken: ct);
-        return id;
+        return await response.Content.ReadFromJsonAsync<long>(cancellationToken: ct);
     }
 
     public async Task<long> UpdateEntryAsync(DamageEntry entry, CancellationToken ct = default)
     {
         var response = await _http.PostAsJsonAsync("damage/damage-update", entry, ct);
         response.EnsureSuccessStatusCode();
-
-        var id = await response.Content.ReadFromJsonAsync<long>(cancellationToken: ct);
-        return id;
+        return await response.Content.ReadFromJsonAsync<long>(cancellationToken: ct);
     }
 }

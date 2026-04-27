@@ -218,20 +218,30 @@ internal static class RouteExtensions
             return result;
         });
 
-        group.MapGet("damage-user-entries", async ([FromServices] IDamageService repo, [FromQuery] int? userId, CancellationToken ct) =>
+        group.MapGet("damage-user-entries", async (HttpContext http, [FromServices] IDamageService repo, CancellationToken ct) =>
         {
+            var userId = http.User.GetUserId();
             var entries = await repo.ListDamageUserEntriesAsync(userId, ct);
             return Results.Ok(entries);
         });
 
-        group.MapGet("damage-vendor-entries", async ([FromServices] IDamageService repo, [FromQuery] int? vendorId, CancellationToken ct) =>
+        group.MapGet("damage-vendor-entries", async (HttpContext http, [FromServices] IDamageService repo, CancellationToken ct) =>
         {
+            var vendorId = http.User.GetVendorId();
+            if (vendorId is null) return Results.Unauthorized();
+
             var entries = await repo.ListDamageVendorEntriesAsync(vendorId, ct);
             return Results.Ok(entries);
         });
 
-        group.MapPost("damage-add", async ([FromServices] IDamageService repo, [FromBody] DamageEntry entry, CancellationToken ct) =>
+        group.MapPost("damage-add", async (HttpContext http, [FromServices] IDamageService repo, [FromBody] DamageEntry entry, CancellationToken ct) =>
         {
+            var userId = http.User.GetUserId();
+            if (userId is not null) entry.UserId = userId.Value;
+
+            var vendorId = http.User.GetVendorId();
+            if (vendorId is not null) entry.VendorId = vendorId.Value;
+
             var id = await repo.AddEntryAsync(entry, ct);
             return Results.Ok(id);
         });
@@ -246,7 +256,7 @@ internal static class RouteExtensions
         //{
         //    if(!placeid.hasValue) var entries = await repo.GetVendorAsync(placeid, ct);
         //    else var entries = await repo.GetVendorAsync(null, int.Parse(placeid.Value), ct);
-            
+
         //    if (entries == null) return Results.NotFound();
 
         //    return Results.Ok(entries);
