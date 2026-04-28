@@ -1,44 +1,84 @@
 ﻿@rendermode InteractiveAuto
-@if (DamageContext != null)
+
+@if (DamageContext is not null)
 {
     <div id="damage-summary">
-        <div>
-            Damage reported at @DamageContext.Street @DamageContext.City @DamageContext.State @DamageContext.Zip on
-            @($"{DamageContext.DateOfLoss:f}")
-        </div>
-        @{
-            foreach (var item in DamageContext.Sections)
-                if (!string.IsNullOrWhiteSpace(item.Entry))
-                {
-                    <div>
-                        <strong>Requested @item.DamageSectionType?.Name</strong>
-                        <div>@item.Entry</div>
-                    </div>
-                }
+        <div>Damage reported</div>
+        @if (HasAny(DamageContext.Street, DamageContext.City, DamageContext.State, DamageContext.Zip))
+        {
+            <div>
+                <div>at</div>
+                <div>
+                    @Value(DamageContext.Street)
+                    @Value(AddressLine)
+                </div>
+            </div>
         }
+        @if (DamageContext.DateOfLoss != default)
+        {
+            <div>
+                <div>on</div>
+                <strong>@($"{DamageContext.DateOfLoss:g}")</strong>
+            </div>
+        }
+        @foreach (var item in DamageContext.Sections?.Where(x => HasValue(x.Entry)) ?? [])
+        {
+            <div>
+                Requested <strong>@item.DamageSectionType?.Name</strong>
+                <div>@item.Entry</div>
+            </div>
+        }
+        @RenderSection("Contact", ("Name", DamageContext.FullName), ("Phone", DamageContext.Phone), ("Email", DamageContext.Email))
+        @RenderSection("Insurance", ("Carrier", DamageContext.InsuranceCarrier), ("Policy Number", DamageContext.PolicyNumber), ("Claim Number", DamageContext.ClaimNumber))
     </div>
 }
 <style>
     #damage-summary {
         display: flex;
         flex-direction: column;
-        gap: 5px;
     }
+
+        #damage-summary > div {
+            display: flex;
+            gap: 5px;
+        }
 </style>
 
 @code {
     [Parameter] public DamageEntry DamageContext { get; set; } = default!;
 
-    protected override async Task OnInitializedAsync()
-    {
-    }
+    private string AddressLine => string.Join(" ", new[]
+        {
+            DamageContext.City,
+            DamageContext.State,
+            DamageContext.Zip
+        }.Where(HasValue));
 
-    protected override async Task OnParametersSetAsync()
-    {
-    }
+    private bool HasValue(string? value) => !string.IsNullOrWhiteSpace(value);
+    private bool HasAny(params string?[] values) => values.Any(HasValue);
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender) return;
-    }
+    private RenderFragment Value(string? value) => @<text>
+        @if (HasValue(value))
+        {
+            <div>@value</div>
+        }
+    </text>;
+
+    private RenderFragment RenderSection(string title, params (string Label, string? Value)[] fields) => @<text>
+        @{
+            var visible = fields.Where(f => HasValue(f.Value)).ToList();
+        }
+        @if (visible.Any())
+        {
+            <div>
+                <strong>@title</strong>
+                <div>
+                    @foreach (var f in visible)
+                    {
+                        <div>@f.Label: @f.Value</div>
+                    }
+                </div>
+            </div>
+        }
+    </text>;
 }

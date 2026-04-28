@@ -4,19 +4,28 @@
         <div id="damage-brief">
             <DamageShort DamageContext="DamageContext"></DamageShort>
             <div>
-                <SfButton type="button" CssClass="e-outline e-primary" OnClick="ToggleBlade" Content="@(IsBladeOpen ? "Hide" : "Review damage report")">
+                <SfButton type="button" IsPrimary="true" CssClass="e-outline" OnClick="ToggleBlade" Content="@(IsBladeOpen ? "Hide" : "Review damage report")">
                 </SfButton>
             </div>
         </div>
     </CardContent>
-    <CardFooter>
-        <SfButton type="submit"
+    <CardContent EnableSeparator="true">
+        <SfButton type="button"
                   OnClick="OnSubmit"
-                  IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right"
-                  CssClass="@(DamageContext?.IsProcessed==true ? "e-primary" : "e-outline e-info")"
+                  IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
+                  CssClass="@(DamageContext?.IsProcessed==true ? "" : "e-outline")"
+                  Content="Chat">
+        </SfButton>
+        <SfButton type="button"
+                  OnClick="OnSubmit"
+                  IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
+                  CssClass="@(DamageContext?.IsProcessed==true ? "" : "e-outline")"
                   Content="Pick up">
         </SfButton>
-    </CardFooter>
+    </CardContent>
+    <CardContent EnableSeparator="true">
+        Coverage calculation:
+    </CardContent>
 </SfCard>
 <style>
     #damage-brief {
