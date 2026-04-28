@@ -1,44 +1,47 @@
-﻿@using System.Security.Claims
-@using Microsoft.AspNetCore.Authorization
+﻿@inject IAuthorizationService authz
 
-@inject IAuthorizationService authz
-
-<div>User: @User.Identity?.Name</div>
-<div style="padding-bottom:24px;">Auth Type: @User.Identity?.AuthenticationType</div>
-<h3>Is Vendor: @isVendor</h3>
-<h3>Is Admin: @isAdmin</h3>
-@if (User?.Claims?.Any() == true)
-{
-    <div>All Claims:</div>
-    <ul>
-        @foreach (var claim in User.Claims.OrderBy(c => c.Type))
-        {
-            <li><strong>@claim.Type</strong>: @claim.Value</li>
-        }
-    </ul>
-}
-
+<SfCard role="region">
+    <CardHeader>
+        User: @user.Identity?.Name
+    </CardHeader>
+    <CardContent EnableSeparator="true">
+        <div style="padding-bottom:14px;">Auth Type: @user.Identity?.AuthenticationType</div>
+        <h3>Is Vendor: @isVendor</h3>
+        <h3>Is Admin: @isAdmin</h3>
+    </CardContent>
+    @if (user?.Claims?.Any() == true)
+    {
+        <CardContent EnableSeparator="true">
+            <div>All Claims:</div>
+            <ul>
+                @foreach (var claim in user.Claims.OrderBy(c => c.Type))
+                {
+                    <li><strong>@claim.Type</strong>: @claim.Value</li>
+                }
+            </ul>
+        </CardContent>
+    }
+</SfCard>
 @code {
     [Parameter]
-    public ClaimsPrincipal User { get; set; } = default!;
+    public int RefreshVersion { get; set; }
 
+    [CascadingParameter]
+    private Task<AuthenticationState> authStateTask { get; set; } = default!;
+
+    private ClaimsPrincipal user { get; set; } = default!;
     private bool isVendor;
     private bool isAdmin;
 
     protected override async Task OnParametersSetAsync()
     {
-        if (User is not null)
-        {
-            var result = await authz.AuthorizeAsync(User, "Vendor");
-            isVendor = result.Succeeded;
+        var authState = await authStateTask;
+        user = authState.User;
 
-            result = await authz.AuthorizeAsync(User, "Admin");
-            isAdmin = result.Succeeded;
-        }
-        else
-        {
-            isVendor = false;
-            isAdmin = false;
-        }
+        var result = await authz.AuthorizeAsync(user, "Vendor");
+        isVendor = result.Succeeded;
+
+        result = await authz.AuthorizeAsync(user, "Admin");
+        isAdmin = result.Succeeded;
     }
 }

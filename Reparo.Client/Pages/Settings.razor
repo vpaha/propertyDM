@@ -7,6 +7,7 @@
 @inject IJSRuntime JSRuntime
 @inject NavigationManager nav
 @inject HttpClient _httpClient
+@inject IUserService userService
 
 <PageTitle>Settings</PageTitle>
 
@@ -61,13 +62,15 @@
             </div>
         </CardContent>
         <AuthorizeView Policy="Admin">
-            <Authorized Context="auth">
+            <Authorized>
                 <CardContent EnableSeparator="true">
-                    <UserContextInfo User="auth.User"></UserContextInfo>
+                    <UserList RefreshRequested="RefreshPageAsync"></UserList>
                 </CardContent>
-                <CardContent EnableSeparator="true">
-                    <UserList RefreshRequested="RefreshUsersAsync"></UserList>
-                </CardContent>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView>
+            <Authorized>
+                <UserContextInfo RefreshVersion="refreshVersion"></UserContextInfo>
             </Authorized>
         </AuthorizeView>
     </SfCard>
@@ -81,6 +84,9 @@
 </style>
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authStateTask { get; set; } = default!;
+
     private sealed record ThemeSettings(string ThemeName, bool IsDarkMode, string Culture);
 
     private ThemeSettings CreateTheme(string culture) =>
@@ -153,8 +159,14 @@
         await _httpClient.PostAsJsonAsync(nav.ToAbsoluteUri("config/theme"), theme);
     }
 
-    private async Task RefreshUsersAsync()
+    private int refreshVersion;
+
+    private async Task RefreshPageAsync()
     {
+        var authState = await authStateTask;
+        await userService.ProvisionAsync(authState.User);
+
+        refreshVersion++;
         StateHasChanged();
     }
 }

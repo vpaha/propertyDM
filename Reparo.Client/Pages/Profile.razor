@@ -1,0 +1,47 @@
+﻿@page "/profile"
+@attribute [Authorize]
+
+@inject IAuthorizationService authz
+@inject IVendorRepo vendorRepo
+@inject ToastService toastService
+
+<PageTitle>Profile | Property Claims</PageTitle>
+
+<section class="zoom-in">
+    <SfSpinner Size="48" Type="SpinnerType.Material" @bind-Visible="@isLoading"></SfSpinner>
+    <AuthorizeView Policy="Vendor">
+        <Authorized>
+            <VendorDetails Vendor="model"></VendorDetails>
+        </Authorized>
+        <NotAuthorized>
+            <UserContextInfo></UserContextInfo>
+        </NotAuthorized>
+    </AuthorizeView>
+</section>
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authStateTask { get; set; } = default!;
+
+    private VendorModel? model { get; set; }
+    private bool isLoading { get; set; } = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        try
+        {
+            var authState = await authStateTask;
+            var result = await authz.AuthorizeAsync(authState.User, "Vendor");
+            if (result.Succeeded)
+            {
+                model = await vendorRepo.GetVendorAsync();
+            }
+        } catch (Exception ex)
+        {
+            toastService.ShowError(ex.Message);
+        } finally
+        {
+            isLoading = false;
+        }
+    }
+}

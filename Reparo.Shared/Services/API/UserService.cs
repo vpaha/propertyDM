@@ -5,6 +5,7 @@ using System.Security.Claims;
 public interface IUserService
 {
     Task ProvisionAsync(ClaimsPrincipal principal, CancellationToken ct = default);
+
     Task<IReadOnlyList<AppUser>> GetUsersAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<AppRole>> GetRolesAsync(CancellationToken ct = default);
     Task UpdateRolesAsync(AppUser user, CancellationToken ct = default);

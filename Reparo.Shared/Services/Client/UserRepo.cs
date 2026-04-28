@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 
 public interface IUserRepo
 {
