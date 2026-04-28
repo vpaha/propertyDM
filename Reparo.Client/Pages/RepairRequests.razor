@@ -4,26 +4,129 @@
 @inject ToastService toastService
 
 <PageTitle>Repair Requests | Property Claims</PageTitle>
+
 <section>
-    @if (damageList != null)
-    {
-        foreach (var item in damageList)
-        {
-            <DamageInfo DamageContext="@item"></DamageInfo>
-        }
-    }
+    <SfSpinner Size="48" Type="SpinnerType.Material" @bind-Visible="@isLoading"></SfSpinner>
+    <SfAppBar role="region">
+        <h1>List of repair requests</h1>
+    </SfAppBar>
+    <SfAppBar role="region">
+        <h2>
+            Review each requests to proceed to next steps
+        </h2>
+        <SfButton type="button" CssClass="e-round e-outline" IsPrimary="true" OnClick="toggleBar" IconCss="e-icons e-drag-and-drop-indicator"></SfButton>
+    </SfAppBar>
+    <div id="main-container">
+        <div id="data-container" class="zoom-in">
+            @if (damageList != null)
+            {
+                foreach (var item in damageList)
+                {
+                    <DamageInfo DamageContext="@item" OnToggleBladeEvent="ToggleBlade" IsBladeOpen="isSideBarOpen"></DamageInfo>
+                }
+            }
+        
+        </div>
+    </div>
+    <SfSidebar ID="side-bar-blade" @bind-IsOpen="isSideBarOpen" Type="(IsDesktopView ? SidebarType.Push : SidebarType.Over)" Target="#main-container" Position="SidebarPosition.Right">
+        <ChildContent>
+            @if (EditContext != null)
+            {
+                <SfDataForm EditContext="@EditContext" LabelPosition="FormLabelPosition.Top">
+                    <FormValidator>
+                        <DataAnnotationsValidator></DataAnnotationsValidator>
+                    </FormValidator>
+                    <FormTemplate>
+                        <div id="form-buttons">
+                            <SfButton type="submit"
+                                      OnClick="OnSubmit"
+                                      IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right"
+                                      CssClass="@(damageContext?.IsProcessed==true ? "e-primary" : "e-outline e-info")"
+                                      Content="Update">
+                            </SfButton>
+                        </div>
+                        <Reparo.Shared.Components.Damage.DamageBar DamageContext="@damageContext"></Reparo.Shared.Components.Damage.DamageBar>
+                    </FormTemplate>
+                    <FormButtons></FormButtons>
+                </SfDataForm>
+            }
+        </ChildContent>
+    </SfSidebar>
 </section>
+<style>
+    #side-bar-blade {
+        border: solid 1px grey;
+        border-radius: 8px;
+        max-width: 324px;
+        padding: 10px 15px 10px 15px;
+    }
+
+    #form-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        padding-bottom: 5px;
+        margin-bottom: 5px;
+        border-bottom: 1px solid gray;
+    }
+
+    #main-container {
+        padding-right: 2px;
+        padding-left: 2px;
+    }
+
+        #main-container #data-container .e-card {
+            margin-bottom: 6px;
+        }
+
+</style>
+
 @code {
+    [CascadingParameter(Name = CascadingParams.MediaQuery)] public bool IsDesktopView { get; set; }
+
     IReadOnlyList<DamageEntry> damageList { get; set; } = default!;
+
+    public EditContext EditContext { get; set; } = default!;
+    DamageEntry? damageContext { get; set; } = default!;
+
+    private bool isSideBarOpen { get; set; } = false;
+    private void toggleBar() => isSideBarOpen = !isSideBarOpen;
+
+    private bool isLoading { get; set; } = true;
 
     protected override async Task OnInitializedAsync()
     {
+        isLoading = true;
+
         try
         {
             damageList = await vendorRepo.ListDamageVendorEntriesAsync(CancellationToken.None);
         } catch (Exception ex)
         {
             toastService.ShowError(ex.Message);
+        } finally
+        {
+            isLoading = false;
         }
+    }
+
+    private async Task ToggleBlade(DamageEntry damage)
+    {
+        damageContext = damage;
+        EditContext = new EditContext(damageContext);
+
+        toggleBar();
+    }
+
+    private async Task OnSubmit()
+    {
+        if (!EditContext.Validate()) return;
+
+        if (damageContext != null)
+        {
+            damageContext.IsProcessed = true;
+            //            await damageRepo.UpdateEntryAsync(damageContext, CancellationToken.None);
+        }
+        toggleBar();
     }
 }

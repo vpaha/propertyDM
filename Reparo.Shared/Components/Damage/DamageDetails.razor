@@ -2,21 +2,13 @@
 <SfCard role="link">
     <CardContent>
         <div id="damage-brief">
-            <DamageShort DamageContext="DamageContext"></DamageShort>
+            <DamageLong DamageContext="DamageContext"></DamageLong>
             <div>
-                <SfButton type="button" CssClass="e-outline e-primary" OnClick="ToggleBlade" Content="@(IsBladeOpen ? "Hide" : "Review damage report")">
+                <SfButton type="button" CssClass="e-outline e-primary" OnClick="ToggleBlade" Content="@(IsBladeOpen ? "Hide" : "Edit damage")">
                 </SfButton>
             </div>
         </div>
     </CardContent>
-    <CardFooter>
-        <SfButton type="submit"
-                  OnClick="OnSubmit"
-                  IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right"
-                  CssClass="@(DamageContext?.IsProcessed==true ? "e-primary" : "e-outline e-info")"
-                  Content="Pick up">
-        </SfButton>
-    </CardFooter>
 </SfCard>
 <style>
     #damage-brief {
@@ -32,9 +24,5 @@
     private async Task ToggleBlade()
     {
         await OnToggleBladeEvent.InvokeAsync(DamageContext);
-    }
-
-    private async Task OnSubmit()
-    {
     }
 }

@@ -6,20 +6,26 @@
 
 <PageTitle>Vendor Profile | Property Claims</PageTitle>
 
-<section>
+<section class="zoom-in">
+    <SfSpinner Size="48" Type="SpinnerType.Material" @bind-Visible="@isLoading"></SfSpinner>
     <VendorDetails Vendor="model"></VendorDetails>
 </section>
 @code {
     private VendorModel? model { get; set; }
+    private bool isLoading { get; set; } = true;
 
     protected override async Task OnInitializedAsync()
     {
+        isLoading = true;
         try
         {
             model = await vendorRepo.GetVendorAsync();
         } catch (Exception ex)
         {
             toastService.ShowError(ex.Message);
+        } finally
+        {
+            isLoading = false;
         }
     }
 }
