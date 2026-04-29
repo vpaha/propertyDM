@@ -3,7 +3,7 @@
 public interface IDamageRepo
 {
     Task<IReadOnlyList<DamageSectionType>> ListSectionTypesAsync(CancellationToken ct = default);
-    Task<IReadOnlyList<DamageEntry>> ListDamageUserEntriesAsync(CancellationToken ct = default);
+    Task<IReadOnlyList<DamageEntry>> ListDamageEntriesAsync(bool isVendor, CancellationToken ct = default);
     Task<long> AddEntryAsync(DamageEntry entry, CancellationToken ct = default);
     Task<long> UpdateEntryAsync(DamageEntry entry, CancellationToken ct = default);
 }
@@ -23,9 +23,9 @@ public sealed class DamageRepo : IDamageRepo
         return list ?? Array.Empty<DamageSectionType>();
     }
 
-    public async Task<IReadOnlyList<DamageEntry>> ListDamageUserEntriesAsync(CancellationToken ct = default)
+    public async Task<IReadOnlyList<DamageEntry>> ListDamageEntriesAsync(bool isVendor, CancellationToken ct = default)
     {
-        var list = await _http.GetFromJsonAsync<IReadOnlyList<DamageEntry>>("damage/damage-user-entries", ct);
+        var list = await _http.GetFromJsonAsync<IReadOnlyList<DamageEntry>>($"damage/damage-entries?isvendor={isVendor}", ct);
         return list ?? Array.Empty<DamageEntry>();
     }
 

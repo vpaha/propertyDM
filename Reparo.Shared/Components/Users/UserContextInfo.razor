@@ -23,11 +23,10 @@
     }
 </SfCard>
 @code {
+    [CascadingParameter] private Task<AuthenticationState> authStateTask { get; set; } = default!;
+    
     [Parameter]
     public int RefreshVersion { get; set; }
-
-    [CascadingParameter]
-    private Task<AuthenticationState> authStateTask { get; set; } = default!;
 
     private ClaimsPrincipal user { get; set; } = default!;
     private bool isVendor;

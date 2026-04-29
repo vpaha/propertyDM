@@ -60,7 +60,7 @@
     }
 </style>
 @code {
-    [CascadingParameter(Name = CascadingParams.MediaQuery)] public bool IsDesktopView { get; set; }
+    [CascadingParameter(Name = CascadingParams.MediaQuery)] private bool IsDesktopView { get; set; }
     [Parameter] public bool ForceDesktopView { get; set; } // This parameter is used to force desktop view in the dialog, as the media query does not work inside it.
 
     private bool IsDesktop => ForceDesktopView || IsDesktopView;

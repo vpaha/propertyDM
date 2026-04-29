@@ -137,7 +137,7 @@
     }
 </style>
 @code {
-    [CascadingParameter(Name = CascadingParams.MediaQuery)] public bool IsDesktopView { get; set; }
+    [CascadingParameter(Name = CascadingParams.MediaQuery)] private bool IsDesktopView { get; set; }
     [Parameter] public bool IsSideMenuOpen { get; set; } = default!;
 
     [Inject]
@@ -229,7 +229,7 @@
             var claimId = await damageRepo.AddEntryAsync(DamageContext, CancellationToken.None);
 
             toastService.ShowSuccess($"Claim #{claimId} has been saved.", "System");
-            nav.NavigateTo("tracking");
+            nav.NavigateTo("requests");
         } catch (Exception ex)
         {
             toastService.ShowError(ex.Message);

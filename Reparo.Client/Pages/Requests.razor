@@ -1,9 +1,21 @@
 ﻿@page "/requests"
-@attribute [Authorize(Policy = "Vendor")]
-@inject IVendorRepo vendorRepo
-@inject ToastService toastService
+@attribute [AllowAnonymous]
 
-<PageTitle>Repair Requests | Property Claims</PageTitle>
+@inject ToastService toastService
+@inject IDamageRepo damageRepo
+@inject IAuthorizationService authz
+
+<PageTitle>Track Property Repair Status | Property Claims</PageTitle>
+
+<HeadContent>
+    <meta name="description" content="Track your property damage claim online, review repair progress, and stay updated throughout the insurance claim process with Property Claims." />
+
+    <link rel="canonical" href="https://www.propertyclaims.com/requests" />
+
+    <meta property="og:title" content="Track Property Damage Claim Status | Repair Progress & Claim Updates | Property Claims" />
+    <meta property="og:description" content="Track your property damage claim online, review repair progress, and stay updated throughout the insurance claim process with Property Claims." />
+    <meta property="og:url" content="https://www.propertyclaims.com/requests" />
+</HeadContent>
 
 <section>
     <SfSpinner Size="48" Type="SpinnerType.Material" @bind-Visible="@isLoading"></SfSpinner>
@@ -12,40 +24,65 @@
     </SfAppBar>
     <SfAppBar role="region">
         <h2>
-            Review each requests to proceed to next steps
+            Review repair progress to proceed to next steps
         </h2>
         <SfButton type="button" CssClass="e-round e-outline" IsPrimary="true" OnClick="toggleBar" IconCss="e-icons e-drag-and-drop-indicator"></SfButton>
     </SfAppBar>
     <div id="main-container">
         <div id="data-container" class="zoom-in">
-            @if (damageList != null)
+            @if (damageList?.Any() == true)
             {
-                foreach (var item in damageList)
+                @foreach (var item in damageList)
                 {
-                    <DamageInfo DamageContext="@item" OnToggleBladeEvent="ToggleBlade" IsBladeOpen="isSideBarOpen"></DamageInfo>
+                    @if (isVendor)
+                    {
+                        <DamageInfo DamageContext="@item" OnToggleBladeEvent="ToggleBlade" IsBladeOpen="isSideBarOpen" />
+                    }
+                    else
+                    {
+                        <Tracking DamageContext="@item" OnToggleBladeEvent="ToggleBlade" IsBladeOpen="isSideBarOpen" />
+                    }
                 }
             }
-        
         </div>
     </div>
     <SfSidebar ID="side-bar-blade" @bind-IsOpen="isSideBarOpen" Type="(IsDesktopView ? SidebarType.Push : SidebarType.Over)" Target="#main-container" Position="SidebarPosition.Right">
         <ChildContent>
-            @if (EditContext != null)
+            @if (EditContext is not null)
             {
                 <SfDataForm EditContext="@EditContext" LabelPosition="FormLabelPosition.Top">
                     <FormValidator>
                         <DataAnnotationsValidator></DataAnnotationsValidator>
                     </FormValidator>
                     <FormTemplate>
-                        <div id="form-buttons">
-                            <SfButton type="submit"
-                                      OnClick="OnSubmit"
-                                      IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
-                                      CssClass="@(damageContext.IsProcessed==true ? "" : "e-outline")"
-                                      Content="Update">
-                            </SfButton>
-                        </div>
-                        <DamageForm DamageContext="@damageContext"></DamageForm>
+                        <SfCard role="region">
+                            @{
+                                foreach (var item in damageContext.Sections)
+                                    if (!string.IsNullOrWhiteSpace(item.Entry))
+                                    {
+                                        <CardContent EnableSeparator="true">
+                                            <strong>@item.DamageSectionType?.Name</strong>
+                                            <div>@item.Entry</div>
+                                        </CardContent>
+                                    }
+                            }
+                        </SfCard>
+                        @if (isVendor)
+                        {
+                            <div id="form-buttons">
+                                <SfButton type="button" Content="Run Review"
+                                          IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
+                                          CssClass="@((damageContext.IsProcessed == true ? "e-outline" : ""))"
+                                          OnClick="OnSubmit">
+                                </SfButton>
+                                <SfButton type="button" Content="Upload Pictures"
+                                          IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Left" IsPrimary="true"
+                                          CssClass="@((damageContext.IsProcessed == true ? "e-outline" : ""))"
+                                          OnClick="OnUpload">
+                                </SfButton>
+                            </div>
+                            <DamageForm DamageContext="@damageContext"></DamageForm>
+                        }
                     </FormTemplate>
                     <FormButtons></FormButtons>
                 </SfDataForm>
@@ -61,38 +98,46 @@
         padding: 10px 15px 10px 15px;
     }
 
-    #form-buttons {
-        display: flex;
-        justify-content: space-between;
-        gap: 20px;
-        padding-bottom: 5px;
-        margin-bottom: 5px;
-        border-bottom: 1px solid gray;
-    }
+        #side-bar-blade #form-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding-bottom: 5px;
+            padding-top: 5px;
+            margin-bottom: 5px;
+            margin-top: 5px;
+        }
 
     #main-container {
         padding-right: 2px;
         padding-left: 2px;
     }
 
-        #main-container #data-container .e-card {
-            margin-bottom: 6px;
+        #main-container #data-container {
+            min-height: 70vh;
         }
+
+            #main-container #data-container .e-card {
+                margin-bottom: 6px;
+            }
 
 </style>
 
 @code {
-    [CascadingParameter(Name = CascadingParams.MediaQuery)] public bool IsDesktopView { get; set; }
-
-    IReadOnlyList<DamageEntry> damageList { get; set; } = default!;
+    [CascadingParameter] private Task<AuthenticationState> authStateTask { get; set; } = default!;
+    [CascadingParameter(Name = CascadingParams.MediaQuery)] private bool IsDesktopView { get; set; }
 
     public EditContext EditContext { get; set; } = default!;
-    DamageEntry damageContext { get; set; } = default!;
 
     private bool isSideBarOpen { get; set; } = false;
     private void toggleBar() => isSideBarOpen = !isSideBarOpen;
 
+    IReadOnlyList<DamageEntry> damageList { get; set; } = default!;
+    DamageEntry damageContext { get; set; } = default!;
+
     private bool isLoading { get; set; } = true;
+
+    private bool isVendor { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -100,7 +145,11 @@
 
         try
         {
-            damageList = await vendorRepo.ListDamageVendorEntriesAsync(CancellationToken.None);
+            var authState = await authStateTask;
+            var result = await authz.AuthorizeAsync(authState.User, "Vendor");
+            isVendor = result.Succeeded;
+            
+            damageList = await damageRepo.ListDamageEntriesAsync(isVendor, CancellationToken.None);
         } catch (Exception ex)
         {
             toastService.ShowError(ex.Message);
@@ -122,11 +171,15 @@
     {
         if (!EditContext.Validate()) return;
 
-        if (damageContext is not null)
-        {
-            damageContext.IsProcessed = true;
-            //            await damageRepo.UpdateEntryAsync(damageContext, CancellationToken.None);
-        }
-        toggleBar();
+        // damageContext.IsProcessed = true;
+        // if (isVendor)
+        //     await vendorRepo.UpdateEntryAsync(damageContext, CancellationToken.None);
+        // else
+        //     await damageRepo.UpdateEntryAsync(damageContext, CancellationToken.None);
+    }
+
+    private async Task OnUpload()
+    {
+        if (!EditContext.Validate()) return;
     }
 }

@@ -92,8 +92,7 @@
 </body>
 </html>
 @code {
-    [CascadingParameter]
-    private HttpContext httpContext { get; set; } = default!;
+    [CascadingParameter] private HttpContext httpContext { get; set; } = default!;
 
     private IComponentRenderMode? PageRenderMode =>
         httpContext?.AcceptsInteractiveRouting() == true

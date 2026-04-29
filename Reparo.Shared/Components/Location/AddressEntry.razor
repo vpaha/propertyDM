@@ -44,7 +44,7 @@ else
     <AddressLookup AddressResolved="OnAddressResolved"></AddressLookup>
 }
 @code {
-    [CascadingParameter(Name = CascadingParams.MediaQuery)] public bool IsDesktopView { get; set; }
+    [CascadingParameter(Name = CascadingParams.MediaQuery)] private bool IsDesktopView { get; set; }
 
     [Parameter] public DamageEntry DamageContext { get; set; } = default!;
     [Parameter] public EventCallback<bool> AddressChanged { get; set; }

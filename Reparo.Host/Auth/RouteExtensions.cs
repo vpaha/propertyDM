@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Net.Http.Headers;
 using Stripe;
 using Stripe.Checkout;
@@ -195,10 +196,15 @@ internal static class RouteExtensions
             return result;
         });
 
-        group.MapGet("damage-user-entries", async (HttpContext http, [FromServices] IDamageService repo, CancellationToken ct) =>
+        group.MapGet("damage-entries", async (HttpContext http, [FromServices] IDamageService repo, [FromQuery] bool isVendor, CancellationToken ct) =>
         {
-            var userId = http.User.GetUserId();
-            var entries = await repo.ListDamageUserEntriesAsync(userId, ct);
+            int? userId = null;
+            int? vendorId = null;
+
+            if (isVendor) vendorId = http.User.GetVendorId();
+            if (vendorId is null) userId = http.User.GetUserId();
+
+            var entries = await repo.ListDamageUserEntriesAsync(userId, vendorId, ct);
             return Results.Ok(entries);
         });
 
@@ -254,15 +260,6 @@ internal static class RouteExtensions
 
     internal static IEndpointConventionBuilder MapVendorEndpoints(this RouteGroupBuilder group)
     {
-        group.MapGet("repair-requests", async (HttpContext http, [FromServices] IDamageService repo, CancellationToken ct) =>
-        {
-            var vendorId = http.User.GetVendorId();
-            if (vendorId is null) return Results.Unauthorized();
-
-            var entries = await repo.ListDamageVendorEntriesAsync(vendorId, ct);
-            return Results.Ok(entries);
-        }).RequireAuthorization("Vendor");
-
         group.MapGet("vendor-profile", async (HttpContext http, [FromServices] IVendorService repo, CancellationToken ct) =>
         {
             var vendorId = http.User.GetVendorId();

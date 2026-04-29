@@ -142,7 +142,7 @@
     }
 </style>
 @code {
-    [CascadingParameter(Name = CascadingParams.MediaQuery)] public bool IsDesktopView { get; set; }
+    [CascadingParameter(Name = CascadingParams.MediaQuery)] private bool IsDesktopView { get; set; }
 
     [Inject]
     private DamageState DamageState { get; set; } = default!;

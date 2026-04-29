@@ -84,8 +84,7 @@
 </style>
 
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState> authStateTask { get; set; } = default!;
+    [CascadingParameter] private Task<AuthenticationState> authStateTask { get; set; } = default!;
 
     private sealed record ThemeSettings(string ThemeName, bool IsDarkMode, string Culture);
 

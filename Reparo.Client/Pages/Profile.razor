@@ -19,8 +19,7 @@
     </AuthorizeView>
 </section>
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState> authStateTask { get; set; } = default!;
+    [CascadingParameter] private Task<AuthenticationState> authStateTask { get; set; } = default!;
 
     private VendorModel? model { get; set; }
     private bool isLoading { get; set; } = true;

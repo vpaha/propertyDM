@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 
 public interface IVendorRepo
 {
     Task<VendorModel?> GetVendorAsync(CancellationToken cancellationToken = default);
     Task<VendorModel?> GetVendorByPlaceAsync(string placeId, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<DamageEntry>> ListDamageVendorEntriesAsync(CancellationToken ct = default);
 }
 
 public sealed class VendorRepo : IVendorRepo
@@ -25,11 +23,5 @@ public sealed class VendorRepo : IVendorRepo
     public async Task<VendorModel?> GetVendorAsync(CancellationToken ct = default)
     {
         return await _http.GetFromJsonAsync<VendorModel>("vendor/vendor-profile", ct);
-    }
-
-    public async Task<IReadOnlyList<DamageEntry>> ListDamageVendorEntriesAsync(CancellationToken ct = default)
-    {
-        var list = await _http.GetFromJsonAsync<IReadOnlyList<DamageEntry>>("vendor/repair-requests", ct);
-        return list ?? Array.Empty<DamageEntry>();
     }
 }

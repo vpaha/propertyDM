@@ -51,8 +51,7 @@
         }
 </style>
     @code {
-    [CascadingParameter]
-    private EditContext EditContext { get; set; } = default!;
+    [CascadingParameter] private EditContext EditContext { get; set; } = default!;
 
     [Parameter] public DamageEntrySection DamageContext { get; set; } = default!;
 
