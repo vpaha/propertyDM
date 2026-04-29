@@ -171,6 +171,6 @@
         refreshVersion++;
         StateHasChanged();
 
-        toastService.ShowSuccess("User updated successfully.");
+        toastService.ShowSuccess($"{authState.User.Identity?.Name}'s user updated successfully.");
     }
 }
