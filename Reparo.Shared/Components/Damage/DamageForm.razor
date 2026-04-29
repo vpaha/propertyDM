@@ -1,17 +1,5 @@
 ﻿@rendermode InteractiveAuto
 <div id="damage-info">
-    <SfCard role="region">
-        @{
-            foreach (var item in DamageContext.Sections)
-                if (!string.IsNullOrWhiteSpace(item.Entry))
-                {
-                    <CardContent EnableSeparator="true">
-                        <strong>@item.DamageSectionType?.Name</strong>
-                        <div>@item.Entry</div>
-                    </CardContent>
-                }
-        }
-    </SfCard>
     <SfCard role="article" CssClass="@(DamageContext.IsProcessed ? "zoom-in" : "is-hidden")">
         <CardContent>
             <SfTextBox @bind-Value="DamageContext.Street" Width="100%" CssClass="e-small" FloatLabelType="FloatLabelType.Always"

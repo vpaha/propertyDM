@@ -3,9 +3,7 @@
 
 @using Microsoft.JSInterop
 @using Reparo.Shared.Components.Damage
-@using Syncfusion.Blazor.SmartComponents
 
-@inject IJSRuntime jSRuntime
 @inject ToastService toastService
 @inject IDamageRepo damageRepo
 
@@ -33,7 +31,7 @@
     </SfAppBar>
     <div id="main-container">
         <div id="data-container">
-            @if (damageList != null)
+            @if (damageList is not null)
             {
                 foreach (var item in damageList)
                 {
@@ -51,17 +49,29 @@
                         <DataAnnotationsValidator></DataAnnotationsValidator>
                     </FormValidator>
                     <FormTemplate>
+                        <SfCard role="region">
+                            @{
+                                foreach (var item in damageContext.Sections)
+                                    if (!string.IsNullOrWhiteSpace(item.Entry))
+                                    {
+                                        <CardContent EnableSeparator="true">
+                                            <strong>@item.DamageSectionType?.Name</strong>
+                                            <div>@item.Entry</div>
+                                        </CardContent>
+                                    }
+                            }
+                        </SfCard>
                         <div id="form-buttons">
-                            <SfButton type="button" Content="Run AI Review"
-                                      IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right"
-                                      CssClass="@((damageContext?.IsProcessed == true ? "e-outline" : "e-primary"))"
-                                      OnClick="RunCustomSmartPaste">
+                            <SfButton type="button" Content="Run Review"
+                                      IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
+                                      CssClass="@((damageContext.IsProcessed == true ? "e-outline" : ""))"
+                                      OnClick="OnSubmit">
                             </SfButton>
-                            <SfSmartPasteButton type="button"
-                                                OnClick="OnSubmit"
-                                                CssClass="@(isRunProcessed && damageContext?.IsProcessed==true ? "e-primary" : "e-outline e-info")"
-                                                Content="Update">
-                            </SfSmartPasteButton>
+                            <SfButton type="button" Content="Upload Pictures"
+                                      IconCss="e-icons e-upload" IconPosition="IconPosition.Right" IsPrimary="true"
+                                      CssClass="@((damageContext.IsProcessed == true ? "e-outline" : ""))"
+                                      OnClick="OnUpload">
+                            </SfButton>
                         </div>
                         <DamageForm DamageContext="@damageContext"></DamageForm>
                     </FormTemplate>
@@ -84,8 +94,9 @@
             justify-content: space-between;
             gap: 20px;
             padding-bottom: 5px;
+            padding-top: 5px;
             margin-bottom: 5px;
-            border-bottom: 1px solid gray;
+            margin-top: 5px;
         }
 
     #main-container {
@@ -112,27 +123,8 @@
     private bool isSideBarOpen { get; set; } = false;
     private void toggleBar() => isSideBarOpen = !isSideBarOpen;
 
-    private bool isRunProcessed;
-
     IReadOnlyList<DamageEntry> damageList { get; set; } = default!;
-    DamageEntry? damageContext { get; set; } = default!;
-
-    string? clipboardData { get; set; }
-
-    private async Task RunCustomSmartPaste()
-    {
-        try
-        {
-            damageContext?.IsProcessed = true;
-            isRunProcessed = true;
-
-            clipboardData = damageContext?.BuildCombinedDescription();
-            await jSRuntime.InvokeVoidAsync("setClipboard", clipboardData);
-        } catch (Exception ex)
-        {
-            toastService.ShowError(ex.Message);
-        }
-    }
+    DamageEntry damageContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -144,7 +136,6 @@
             toastService.ShowError(ex.Message);
         } finally
         {
-            isRunProcessed = false;
         }
     }
 
@@ -160,11 +151,12 @@
     {
         if (!EditContext.Validate()) return;
 
-        if (damageContext != null)
-        {
-            damageContext.IsProcessed = true;
-            await damageRepo.UpdateEntryAsync(damageContext, CancellationToken.None);
-        }
-        toggleBar();
+        damageContext.IsProcessed = true;
+        await damageRepo.UpdateEntryAsync(damageContext, CancellationToken.None);
+    }
+
+    private async Task OnUpload()
+    {
+        if (!EditContext.Validate()) return;
     }
 }

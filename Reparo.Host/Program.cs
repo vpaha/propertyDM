@@ -8,7 +8,6 @@ using Serilog;
 using Stripe;
 using Syncfusion.Blazor;
 using Syncfusion.Blazor.Popups;
-using Syncfusion.Blazor.SmartComponents;
 using Syncfusion.Licensing;
 using System.Net.Http.Headers;
 
@@ -209,7 +208,6 @@ public partial class Program
         IChatClient chatClient = openAIClient.GetChatClient(model).AsIChatClient();
 
         builder.Services.AddChatClient(chatClient);
-        builder.Services.AddSyncfusionSmartComponents().InjectOpenAIInference();
     }
 
     private void ConfigurePipeline(WebApplication app, string pathBase)

@@ -86,7 +86,7 @@ public class DamageEntry : IValidatableObject
         if (!string.IsNullOrWhiteSpace(ContactEntry)) parts.Add(ContactEntry);
         if (!string.IsNullOrWhiteSpace(InsuranceEntry)) parts.Add(InsuranceEntry);
 
-        if ( Sections?.Any() == true)
+        if (Sections?.Any() == true)
         {
             parts.AddRange(
                 Sections.Where(d => !string.IsNullOrWhiteSpace(d.Entry))

@@ -55,9 +55,6 @@
 		<PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.2.0-preview.1.26063.2" />
 		<PackageReference Include="OpenAI" Version="2.8.0" />
 		<PackageReference Include="Stripe.net" Version="51.1.0-beta.1" />
-
-		<PackageReference Include="Syncfusion.Blazor.AI" Version="32.1.24" />
-		<PackageReference Include="Syncfusion.Blazor.SmartComponents" Version="32.1.23" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Reparo.Client\Reparo.Client.csproj" />

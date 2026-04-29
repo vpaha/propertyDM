@@ -40,12 +40,12 @@
                         <div id="form-buttons">
                             <SfButton type="submit"
                                       OnClick="OnSubmit"
-                                      IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right"
-                                      CssClass="@(damageContext?.IsProcessed==true ? "e-primary" : "e-outline e-info")"
+                                      IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
+                                      CssClass="@(damageContext.IsProcessed==true ? "" : "e-outline")"
                                       Content="Update">
                             </SfButton>
                         </div>
-                        <Reparo.Shared.Components.Damage.DamageForm DamageContext="@damageContext"></Reparo.Shared.Components.Damage.DamageForm>
+                        <DamageForm DamageContext="@damageContext"></DamageForm>
                     </FormTemplate>
                     <FormButtons></FormButtons>
                 </SfDataForm>
@@ -87,7 +87,7 @@
     IReadOnlyList<DamageEntry> damageList { get; set; } = default!;
 
     public EditContext EditContext { get; set; } = default!;
-    DamageEntry? damageContext { get; set; } = default!;
+    DamageEntry damageContext { get; set; } = default!;
 
     private bool isSideBarOpen { get; set; } = false;
     private void toggleBar() => isSideBarOpen = !isSideBarOpen;
@@ -122,7 +122,7 @@
     {
         if (!EditContext.Validate()) return;
 
-        if (damageContext != null)
+        if (damageContext is not null)
         {
             damageContext.IsProcessed = true;
             //            await damageRepo.UpdateEntryAsync(damageContext, CancellationToken.None);

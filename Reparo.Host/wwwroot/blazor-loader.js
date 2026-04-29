@@ -232,11 +232,11 @@ window.getBrowserLocation = () =>
     });
 };
 
-window.setClipboard = function (text)
-{
-    if (!text) return;
-    navigator.clipboard.writeText(text);
-};
+//window.setClipboard = function (text)
+//{
+//    if (!text) return;
+//    navigator.clipboard.writeText(text);
+//};
 
 window.addEventListener("error", function (event)
 {
