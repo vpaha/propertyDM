@@ -147,3 +147,7 @@ h5 {
   align-items: center;
   gap: 16px;
 }
+
+.e-toast-container .e-toast .e-toast-close-icon {
+  margin-top: 5px !important;
+}

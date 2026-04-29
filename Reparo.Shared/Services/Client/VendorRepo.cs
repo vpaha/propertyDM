@@ -2,8 +2,9 @@
 
 public interface IVendorRepo
 {
-    Task<VendorModel?> GetVendorAsync(CancellationToken cancellationToken = default);
-    Task<VendorModel?> GetVendorByPlaceAsync(string placeId, CancellationToken cancellationToken = default);
+    Task<VendorModel> GetVendorAsync(CancellationToken cancellationToken = default);
+    Task<VendorModel> GetVendorByPlaceAsync(string placeId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<VendorModel>> GetVendorListAsync(CancellationToken cancellationToken = default);
 }
 
 public sealed class VendorRepo : IVendorRepo
@@ -15,13 +16,18 @@ public sealed class VendorRepo : IVendorRepo
         _http = http;
     }
 
-    public async Task<VendorModel?> GetVendorByPlaceAsync(string placeId, CancellationToken ct = default)
+    public async Task<VendorModel> GetVendorByPlaceAsync(string placeId, CancellationToken ct = default)
     {
-        return await _http.GetFromJsonAsync<VendorModel>($"damage/vendor-get?placeid={placeId}", ct);
+        return await _http.GetFromJsonAsync<VendorModel>($"damage/vendor-get?placeid={placeId}", ct) ?? throw new InvalidOperationException("Vendor place not found.");
     }
 
-    public async Task<VendorModel?> GetVendorAsync(CancellationToken ct = default)
+    public async Task<VendorModel> GetVendorAsync(CancellationToken ct = default)
     {
-        return await _http.GetFromJsonAsync<VendorModel>("vendor/vendor-profile", ct);
+        return await _http.GetFromJsonAsync<VendorModel>("vendor/vendor-profile", ct)?? throw new InvalidOperationException("Vendor profile not found.");
+    }
+
+    public async Task<IReadOnlyList<VendorModel>> GetVendorListAsync(CancellationToken cancellationToken = default)
+    {
+        return await _http.GetFromJsonAsync<IReadOnlyList<VendorModel>>("vendor/vendor-list", cancellationToken) ?? Array.Empty<VendorModel>();
     }
 }

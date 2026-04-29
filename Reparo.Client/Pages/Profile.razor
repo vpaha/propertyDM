@@ -1,4 +1,5 @@
 ﻿@page "/profile"
+@rendermode InteractiveAuto
 @attribute [Authorize]
 
 @inject IAuthorizationService authz
@@ -21,7 +22,7 @@
 @code {
     [CascadingParameter] private Task<AuthenticationState> authStateTask { get; set; } = default!;
 
-    private VendorModel? model { get; set; }
+    private VendorModel model { get; set; } = default!;
     private bool isLoading { get; set; } = true;
 
     protected override async Task OnInitializedAsync()

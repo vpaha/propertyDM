@@ -267,6 +267,14 @@ internal static class RouteExtensions
             return vendor is null ? Results.NotFound() : Results.Ok(vendor);
         }).RequireAuthorization("Vendor");
 
+        group.MapGet("vendor-list", async (HttpContext http, [FromServices] IVendorService repo, CancellationToken ct) =>
+        {
+            var entries = await repo.GetVendorListAsync(ct);
+            if (entries == null) return Results.NotFound();
+            return Results.Ok(entries);
+
+        }).RequireAuthorization("Admin");
+
         group.MapGet("user-list", async ([FromServices] IUserService repo, CancellationToken ct) =>
         {
             var entries = await repo.GetUsersAsync(ct);
@@ -281,9 +289,9 @@ internal static class RouteExtensions
             return Results.Ok(entries);
         }).RequireAuthorization("Admin");
 
-        group.MapPost("roles-update", async ([FromServices] IUserService repo, [FromBody] AppUser user, CancellationToken ct) =>
+        group.MapPost("user-update", async ([FromServices] IUserService repo, [FromBody] AppUser user, CancellationToken ct) =>
         {
-            await repo.UpdateRolesAsync(user, ct);
+            await repo.UpdateUserAsync(user, ct);
             return Results.Ok();
         }).RequireAuthorization("Admin");
 

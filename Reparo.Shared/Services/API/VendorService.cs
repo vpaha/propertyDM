@@ -3,7 +3,9 @@
 public interface IVendorService
 {
     Task<VendorModel?> GetVendorAsync(string? placeId, int? vendorId, CancellationToken cancellationToken = default);
-    Task<List<VendorModel>> ListActiveVendorsAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<VendorModel>> GetVendorListAsync(CancellationToken cancellationToken = default);
+
+    // not used
     Task<long> AddVendorAsync(VendorModel vendor, CancellationToken cancellationToken = default);
     Task UpdateVendorAsync(VendorModel vendor, CancellationToken cancellationToken = default);
     Task<bool> VendorExistsAsync(string placeId, CancellationToken cancellationToken = default);
@@ -30,9 +32,9 @@ public sealed class VendorService : IVendorService
         return await query.FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<List<VendorModel>> ListActiveVendorsAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<VendorModel>> GetVendorListAsync(CancellationToken cancellationToken = default)
     {
-        return await _context.Set<VendorModel>().AsNoTracking().Where(v => v.IsActive).OrderBy(v => v.Name).ToListAsync(cancellationToken);
+        return await _context.Set<VendorModel>().AsNoTracking().Where(v => v.IsActive).OrderBy(v => v.UpdatedAt).ToListAsync(cancellationToken);
     }
 
     public async Task<long> AddVendorAsync(VendorModel vendor, CancellationToken cancellationToken = default)

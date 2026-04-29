@@ -8,3 +8,38 @@ main {
 #stepper-container {
     background-color: white;
 }
+
+.e-toast-container {
+    .e-toast {
+        &.e-toast-danger {
+            .e-toast-title {
+                background: $danger;
+            }
+        }
+
+        &.e-toast-success {
+            .e-toast-title {
+                background: $primary;
+            }
+        }
+
+        &.e-toast-warning {
+            .e-toast-title {
+                background: $warning;
+            }
+        }
+
+        &.e-toast-info {
+            .e-toast-title {
+                background: $primary-light;
+            }
+        }
+
+        .e-toast-message {
+            .e-toast-content {
+                background: $primary-text-color;
+                color: $black !important;
+            }
+        }
+    }
+}

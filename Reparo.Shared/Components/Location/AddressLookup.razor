@@ -1,6 +1,4 @@
-﻿@rendermode InteractiveAuto
-
-@inject NavigationManager nav
+﻿@inject NavigationManager nav
 @inject HttpClient httpClient
 @inject IJSRuntime jSRuntime
 @inject ToastService toastService
@@ -39,7 +37,7 @@
             if (place != null) await AddressResolved.InvokeAsync(place);
         } catch (Exception ex)
         {
-            toastService.ShowWarning(ex.Message, "System");
+            toastService.ShowError(ex.Message);
 
             location = new();
             StateHasChanged();

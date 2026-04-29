@@ -1,5 +1,6 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
-@inject IUserRepo userRepo
+﻿@inject IUserRepo userRepo
+@inject SfDialogService dialogService
+@inject ToastService toastService
 
 <h3>User list</h3>
 <SfGrid TValue="AppUser"
@@ -8,16 +9,14 @@
         AllowPaging="true"
         AllowReordering="true"
         AllowSorting="true"
-        AllowFiltering="true"
         ShowColumnMenu="true">
     <GridEditSettings AllowEditing="true" Mode="EditMode.Normal"></GridEditSettings>
-    <GridPageSettings PageSize="GridConstants.RowCount"></GridPageSettings>
+    <GridPageSettings PageSize="GridConstants.RowCount" PageSizes="GridConstants.PageSizes"></GridPageSettings>
     <GridSearchSettings Fields="@(new[] { nameof(AppUser.UserName), nameof(AppUser.Email), nameof(AppUser.ProviderDisplayName) })"
-                        Operator="Syncfusion.Blazor.Operator.StartsWith"
+                        Operator="Syncfusion.Blazor.Operator.Contains"
                         IgnoreCase="true"
                         IgnoreAccent="true">
     </GridSearchSettings>
-    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.CheckBox" Mode="FilterBarMode.Immediate"></GridFilterSettings>
     <GridColumns>
         <GridColumn Field="@nameof(AppUser.UserName)" HeaderText="User name" IsPrimaryKey="true" AllowEditing="false"></GridColumn>
         <GridColumn Field="@nameof(AppUser.ProviderDisplayName)" HeaderText="Provider" AllowEditing="false"></GridColumn>
@@ -46,7 +45,7 @@
 </SfGrid>
 @code {
     [Parameter]
-    public EventCallback RefreshRequested { get; set; }
+    public EventCallback<AppUser> RefreshRequested { get; set; }
 
     private IReadOnlyList<AppUser> appUsers { get; set; } = [];
     private IReadOnlyList<AppRole> availableRoles { get; set; } = [];
@@ -61,8 +60,56 @@
     {
         if (args.RequestType == Syncfusion.Blazor.Grids.Action.Save && args.Data is not null)
         {
-            await userRepo.UpdateRolesAsync(args.Data);
-            await RefreshRequested.InvokeAsync();
+            AppUser user = args.Data;
+
+            if (args.Data?.Roles?.FirstOrDefault(x => x.Name == "vendor") is not null && args.Data.VendorId is null)
+            {                
+                VendorModel? selectedVendor = null;
+
+                bool isConfirm = await dialogService.ConfirmAsync(null, "Select a vendor", new DialogOptions
+                {
+                    CssClass = "popup-dialog",
+                    PrimaryButtonOptions = new DialogButtonOptions
+                    {
+                        Content = "Select a vendor", IconCss = "e-icons e-check-large"
+                    },
+                    CancelButtonOptions = new DialogButtonOptions
+                    {
+                        Content = "Cancel", IconCss = "e-icons e-close"
+                    },
+                    AnimationSettings = new DialogAnimationOptions
+                    {
+                        Effect = DialogEffect.Zoom
+                    },
+                    ChildContent = builder =>
+                    {
+                        builder.OpenComponent<Shared.Components.Vendor.VendorList>(0);
+                        builder.AddAttribute(1, "OnVendorSelected", EventCallback.Factory.Create<VendorModel>(this, async vendor =>
+                        {
+                            selectedVendor = vendor;
+                        }));
+                        builder.CloseComponent();
+                    }
+                });
+                if (isConfirm) {
+                    if (selectedVendor is null)
+                    {
+                        toastService.ShowWarning("No vendor selected.");
+                        args.Cancel = true;
+                    }
+                    else
+                    {
+                        user.VendorId = selectedVendor?.Id;
+                        await RefreshRequested.InvokeAsync(user);
+                    }
+                }
+                else args.Cancel = true;
+            }
+            else
+            {
+                user.VendorId = null;
+                await RefreshRequested.InvokeAsync(user);
+            }
         }
     }
 }

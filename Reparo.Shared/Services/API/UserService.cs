@@ -8,7 +8,7 @@ public interface IUserService
 
     Task<IReadOnlyList<AppUser>> GetUsersAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<AppRole>> GetRolesAsync(CancellationToken ct = default);
-    Task UpdateRolesAsync(AppUser user, CancellationToken ct = default);
+    Task UpdateUserAsync(AppUser user, CancellationToken ct = default);
 }
 
 public sealed class UserService : BaseService, IUserService
@@ -156,7 +156,7 @@ public sealed class UserService : BaseService, IUserService
             .ToListAsync(ct);
     }
 
-    public async Task UpdateRolesAsync(AppUser user, CancellationToken ct = default)
+    public async Task UpdateUserAsync(AppUser user, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(user);
 

@@ -1,4 +1,5 @@
 ﻿@page "/settings"
+@rendermode InteractiveAuto
 @attribute [AllowAnonymous]
 
 @using Microsoft.JSInterop
@@ -8,6 +9,7 @@
 @inject NavigationManager nav
 @inject HttpClient _httpClient
 @inject IUserService userService
+@inject ToastService toastService
 
 <PageTitle>Settings</PageTitle>
 
@@ -88,8 +90,7 @@
 
     private sealed record ThemeSettings(string ThemeName, bool IsDarkMode, string Culture);
 
-    private ThemeSettings CreateTheme(string culture) =>
-        new("Default", false, culture);
+    private ThemeSettings CreateTheme(string culture) => new("Default", false, culture);
 
     private readonly CultureData cultures = new();
     private string selected = string.Empty;
@@ -160,12 +161,16 @@
 
     private int refreshVersion;
 
-    private async Task RefreshPageAsync()
+    private async Task RefreshPageAsync(AppUser user)
     {
         var authState = await authStateTask;
         await userService.ProvisionAsync(authState.User);
 
+        await userService.UpdateUserAsync(user);
+
         refreshVersion++;
         StateHasChanged();
+
+        toastService.ShowSuccess("User updated successfully.");
     }
 }

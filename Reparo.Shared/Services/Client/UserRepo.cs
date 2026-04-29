@@ -4,7 +4,7 @@ public interface IUserRepo
 {
     Task<IReadOnlyList<AppUser>> GetUsersAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<AppRole>> GetRolesAsync(CancellationToken ct = default);
-    Task UpdateRolesAsync(AppUser user, CancellationToken ct = default);
+    Task UpdateUserAsync(AppUser user, CancellationToken ct = default);
 }
 
 public sealed class UserRepo : IUserRepo
@@ -26,8 +26,8 @@ public sealed class UserRepo : IUserRepo
         return await _http.GetFromJsonAsync<IReadOnlyList<AppRole>>($"vendor/roles-get", ct) ?? Array.Empty<AppRole>();
     }
 
-    public async Task UpdateRolesAsync(AppUser user, CancellationToken ct = default)
+    public async Task UpdateUserAsync(AppUser user, CancellationToken ct = default)
     {
-        await _http.PostAsJsonAsync("vendor/roles-update", user, ct);
+        await _http.PostAsJsonAsync("vendor/user-update", user, ct);
     }
 }

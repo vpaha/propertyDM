@@ -1,7 +1,7 @@
 ﻿@import 'animation.scss';
 
 $black: #333333 !default;
-$cyan: #6994B5 !default;
+$cyan: #94D1FF !default;
 
 $dialog-header-bg-color: $black !default;
 $dialog-header-font-color: white !default;
@@ -26,7 +26,6 @@ body {
 
 main {
     flex-basis: 100%;
-
     padding: 3px 10px 5px 10px;
     background-position: center;
     background-repeat: no-repeat;
@@ -49,15 +48,19 @@ h1, h2, h3, h4, h5 {
 h1 {
     font-size: 1.34em;
 }
+
 h2 {
     font-size: 1.15em;
 }
+
 h3 {
     font-size: 1em;
 }
+
 h4 {
     font-size: 0.8em;
 }
+
 h5 {
     font-size: 0.6em;
 }
@@ -101,4 +104,12 @@ h5 {
     justify-content: center;
     align-items: center;
     gap: 16px;
+}
+
+.e-toast-container {
+    .e-toast {
+        .e-toast-close-icon {
+            margin-top: 5px !important;
+        }
+    }
 }

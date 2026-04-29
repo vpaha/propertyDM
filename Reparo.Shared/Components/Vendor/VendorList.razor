@@ -1,0 +1,44 @@
+﻿@inject IVendorRepo vendorRepo
+
+<h3>Vendor list</h3>
+<SfGrid TValue="VendorModel"
+        DataSource="@appVendors"
+        Toolbar="@(new List<string> { "Search" })"
+        AllowPaging="true"
+        AllowReordering="true"
+        AllowSorting="true"
+        ShowColumnMenu="true">
+    <GridPageSettings PageSize="GridConstants.RowCount" PageSizes="GridConstants.PageSizes"></GridPageSettings>
+    <GridSearchSettings Fields="@(new[] { nameof(VendorModel.Name), nameof(VendorModel.LegalName), nameof(VendorModel.AddressLine1) })"
+                        Operator="Syncfusion.Blazor.Operator.Contains"
+                        IgnoreCase="true"
+                        IgnoreAccent="true">
+    </GridSearchSettings>
+    <GridColumns>
+        <GridColumn Field="@nameof(VendorModel.Name)" HeaderText="Name" IsPrimaryKey="true" AllowEditing="false"></GridColumn>
+        <GridColumn Field="@nameof(VendorModel.LegalName)" HeaderText="Legal Name" AllowEditing="false"></GridColumn>
+        <GridColumn Field="@nameof(VendorModel.AddressLine1)" HeaderText="Address"></GridColumn>
+        <GridColumn Field="@nameof(VendorModel.City)" HeaderText="City"></GridColumn>
+        <GridColumn Field="@nameof(VendorModel.Description)" HeaderText="Description"></GridColumn>
+    </GridColumns>
+    <GridEvents TValue="VendorModel" RowSelected="OnRowSelected"></GridEvents>
+</SfGrid>
+@code {
+    [Parameter]
+    public EventCallback<VendorModel> OnVendorSelected { get; set; }
+
+    private IReadOnlyList<VendorModel>? appVendors { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        appVendors = await vendorRepo.GetVendorListAsync();
+    }
+
+    private async Task OnRowSelected(RowSelectEventArgs<VendorModel> args)
+    {
+        if (args.Data is not null)
+        {
+            await OnVendorSelected.InvokeAsync(args.Data);
+        }
+    }
+}
