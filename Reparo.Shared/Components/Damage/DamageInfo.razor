@@ -2,7 +2,7 @@
 <SfCard role="link">
     <CardContent>
         <div id="damage-brief">
-            <DamageShort DamageContext="DamageContext"></DamageShort>
+            <ShortDescription DamageContext="DamageContext"></ShortDescription>
             <div>
                 <SfButton type="button" IsPrimary="true" CssClass="e-outline" OnClick="ToggleBlade" Content="@(IsBladeOpen ? "Hide" : "Review damage report")">
                 </SfButton>
@@ -24,7 +24,7 @@
         </SfButton>
     </CardContent>
     <CardContent EnableSeparator="true">
-        Coverage calculation:
+        <Estimate></Estimate>
     </CardContent>
 </SfCard>
 <style>

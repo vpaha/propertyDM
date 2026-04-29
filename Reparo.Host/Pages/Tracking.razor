@@ -37,7 +37,7 @@
             {
                 foreach (var item in damageList)
                 {
-                    <DamageDetails DamageContext="@item" OnToggleBladeEvent="ToggleBlade" IsBladeOpen="isSideBarOpen"></DamageDetails>
+                    <Damage DamageContext="@item" OnToggleBladeEvent="ToggleBlade" IsBladeOpen="isSideBarOpen"></Damage>
                 }
             }
         </div>
@@ -63,7 +63,7 @@
                                                 Content="Update">
                             </SfSmartPasteButton>
                         </div>
-                        <DamageBar DamageContext="@damageContext"></DamageBar>
+                        <DamageForm DamageContext="@damageContext"></DamageForm>
                     </FormTemplate>
                     <FormButtons></FormButtons>
                 </SfDataForm>
