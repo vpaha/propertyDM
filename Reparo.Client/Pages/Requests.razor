@@ -5,6 +5,7 @@
 @inject ToastService toastService
 @inject IDamageRepo damageRepo
 @inject IAuthorizationService authz
+@inject SfDialogService dialogService
 
 <PageTitle>Track Property Repair Status | Property Claims</PageTitle>
 
@@ -49,44 +50,33 @@
     </div>
     <SfSidebar ID="side-bar-blade" @bind-IsOpen="isSideBarOpen" Type="(IsDesktopView ? SidebarType.Push : SidebarType.Over)" Target="#main-container" Position="SidebarPosition.Right">
         <ChildContent>
-            @if (EditContext is not null)
-            {
-                <SfDataForm EditContext="@EditContext" LabelPosition="FormLabelPosition.Top">
-                    <FormValidator>
-                        <DataAnnotationsValidator></DataAnnotationsValidator>
-                    </FormValidator>
-                    <FormTemplate>
-                        <SfCard role="region">
-                            @{
-                                foreach (var item in damageContext.Sections)
-                                    if (!string.IsNullOrWhiteSpace(item.Entry))
-                                    {
-                                        <CardContent EnableSeparator="true">
-                                            <strong>@item.DamageSectionType?.Name</strong>
-                                            <div>@item.Entry</div>
-                                        </CardContent>
-                                    }
-                            }
-                        </SfCard>
-                        @if (isVendor)
+            <SfCard role="region">
+                @if (damageContext is not null)
+                {
+                    foreach (var item in damageContext.Sections)
+                        if (!string.IsNullOrWhiteSpace(item.Entry))
                         {
-                            <div id="form-buttons">
-                                <SfButton type="button" Content="Run Review"
-                                          IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
-                                          CssClass="@((damageContext.IsProcessed == true ? "e-outline" : ""))"
-                                          OnClick="OnSubmit">
-                                </SfButton>
-                                <SfButton type="button" Content="Upload Pictures"
-                                          IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Left" IsPrimary="true"
-                                          CssClass="@((damageContext.IsProcessed == true ? "e-outline" : ""))"
-                                          OnClick="OnUpload">
-                                </SfButton>
-                            </div>
-                            <DamageForm DamageContext="@damageContext"></DamageForm>
+                            <CardContent EnableSeparator="true">
+                                <strong>@item.DamageSectionType?.Name</strong>
+                                <div>@item.Entry</div>
+                            </CardContent>
                         }
-                    </FormTemplate>
-                    <FormButtons></FormButtons>
-                </SfDataForm>
+                }
+            </SfCard>
+            <div id="form-buttons">
+                <SfButton type="button" Content="Run Review"
+                          IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
+                          CssClass="@((damageContext?.IsProcessed == true ? "e-outline" : ""))"
+                          OnClick="OnSubmit">
+                </SfButton>
+            </div>
+            @if (isVendor)
+            {
+                <div>picture list</div>
+            }
+            else
+            {
+                <div>picture list drop</div>
             }
         </ChildContent>
     </SfSidebar>
@@ -128,8 +118,6 @@
     [CascadingParameter] private Task<AuthenticationState> authStateTask { get; set; } = default!;
     [CascadingParameter(Name = CascadingParams.MediaQuery)] private bool IsDesktopView { get; set; }
 
-    public EditContext EditContext { get; set; } = default!;
-
     private bool isSideBarOpen { get; set; } = false;
     private void toggleBar() => isSideBarOpen = !isSideBarOpen;
 
@@ -137,28 +125,22 @@
     DamageEntry damageContext { get; set; } = default!;
 
     private bool isLoading { get; set; } = true;
-
-    private bool isVendor { get; set; }
+    private bool isVendor { get; set; } = true;
 
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-
         try
         {
             var authState = await authStateTask;
             var result = await authz.AuthorizeAsync(authState.User, "Vendor");
+            isVendor = result.Succeeded;
 
             int? vendorId = null;
-            if (result.Succeeded)
+            if (isVendor)
             {
-                isVendor = true;
-
                 var value = authState.User.FindFirst("vendor_id")?.Value;
-                if (int.TryParse(value, out var parsedId))
-                {
-                    vendorId = parsedId;
-                }
+                if (int.TryParse(value, out var parsedId)) vendorId = parsedId;
             }
             damageList = await damageRepo.ListDamageEntriesAsync(vendorId, CancellationToken.None);
         } catch (Exception ex)
@@ -173,24 +155,32 @@
     private async Task ToggleBlade(DamageEntry damage)
     {
         damageContext = damage;
-        EditContext = new EditContext(damageContext);
-
         toggleBar();
     }
 
     private async Task OnSubmit()
     {
-        if (!EditContext.Validate()) return;
-
+        if (!isVendor)
+        {
+            await dialogService.AlertAsync(null, damageContext.DateOfLoss.ToString("G"), new DialogOptions
+            {
+                ShowCloseIcon = true,
+                PrimaryButtonOptions = new DialogButtonOptions
+                {
+                    Content = "Close"
+                },
+                ChildContent = builder =>
+                {
+                    builder.OpenComponent<DamageForm>(0);
+                    builder.AddAttribute(1, "DamageContext", damageContext);
+                    builder.CloseComponent();
+                }
+            });
+        }
         // damageContext.IsProcessed = true;
         // if (isVendor)
         //     await vendorRepo.UpdateEntryAsync(damageContext, CancellationToken.None);
         // else
         //     await damageRepo.UpdateEntryAsync(damageContext, CancellationToken.None);
-    }
-
-    private async Task OnUpload()
-    {
-        if (!EditContext.Validate()) return;
     }
 }
