@@ -1,0 +1,61 @@
+﻿<SfCard role="region">
+    <CardHeader>
+        <h2>Image Upload</h2>
+    </CardHeader>
+
+    <CardContent>
+        <SfUploader ID="UploadFiles"
+                    AutoUpload="true"
+                    AllowMultiple="true"
+                    AllowedExtensions=".jpg,.jpeg,.png,.gif,.webp"
+                    MaxFileSize="104857600"
+                    EnableHtmlSanitizer="true"
+                    EnablePersistence="true">
+
+            <UploaderEvents ValueChange="OnChange" />
+
+        </SfUploader>
+    </CardContent>
+</SfCard>
+
+@code {
+    [Parameter] public long DamageId { get; set; }
+
+    private string uploadDirectory = default!;
+
+    protected override void OnParametersSet()
+    {
+        uploadDirectory = Path.Combine(
+            Environment.WebRootPath,
+            "Logs",
+            DamageId.ToString());
+
+        Directory.CreateDirectory(uploadDirectory);
+    }
+
+    private async Task OnChange(UploadChangeEventArgs args)
+    {
+        foreach (var file in args.Files)
+        {
+            try
+            {
+                var fileName = Path.GetFileName(file.FileInfo.Name);
+                var filePath = Path.Combine(uploadDirectory, fileName);
+
+                await using var fileStream = new FileStream(
+                    filePath,
+                    FileMode.Create,
+                    FileAccess.Write,
+                    FileShare.None);
+
+                await file.File
+                    .OpenReadStream(100 * 1024 * 1024)
+                    .CopyToAsync(fileStream);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Image upload failed: {ex.Message}");
+            }
+        }
+    }
+}

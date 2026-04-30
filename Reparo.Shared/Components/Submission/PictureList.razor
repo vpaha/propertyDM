@@ -1,0 +1,66 @@
+﻿@using Syncfusion.Blazor.Navigations
+
+<SfCarousel CssClass="default-carousel" AnimationEffect="CarouselAnimationEffect.Fade">
+    @foreach (var image in Images)
+    {
+        <CarouselItem>
+            <figure class="img-container">
+                <img src="@image.Url" alt="@image.FileName" style="height:100%;width:100%;" />
+                <figcaption class="img-caption">@image.FileName</figcaption>
+            </figure>
+        </CarouselItem>
+    }
+</SfCarousel>
+
+<style>
+    .default-carousel .e-carousel-items .e-carousel-item .img-container {
+        height: 100%;
+    }
+
+    .default-carousel .e-carousel-items .e-carousel-item .img-caption {
+        bottom: 5em;
+        color: #fff;
+        font-size: 12pt;
+        height: 2em;
+        position: relative;
+        padding: 0.3em 1em;
+        text-align: center;
+    }
+</style>
+
+@code {
+    [Parameter] public long DamageId { get; set; }
+
+    private List<ImageItem> Images { get; set; } = [];
+
+    protected override void OnParametersSet()
+    {
+        var uploadDirectory = Path.Combine("Logs", DamageId.ToString());
+
+        if (!Directory.Exists(uploadDirectory))
+        {
+            Images = [];
+            return;
+        }
+
+        Images = Directory.EnumerateFiles(uploadDirectory).Where(IsImageFile)
+            .Select(file => new ImageItem
+            {
+                FileName = Path.GetFileName(file),
+                Url = $"/Logs/{DamageId}/{Path.GetFileName(file)}"
+            })
+            .ToList();
+    }
+
+    private static bool IsImageFile(string filePath)
+    {
+        var extension = Path.GetExtension(filePath).ToLowerInvariant();
+        return extension is ".jpg" or ".jpeg" or ".png" or ".gif" or ".webp";
+    }
+
+    private sealed class ImageItem
+    {
+        public string FileName { get; set; } = string.Empty;
+        public string Url { get; set; } = string.Empty;
+    }
+}

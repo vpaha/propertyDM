@@ -66,6 +66,7 @@
 </style>
 
 @code {
+    [CascadingParameter] private EditContext EditContext { get; set; } = default!;
     [Parameter] public DamageEntry DamageContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()

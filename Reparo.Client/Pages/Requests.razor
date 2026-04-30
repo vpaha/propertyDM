@@ -50,10 +50,10 @@
     </div>
     <SfSidebar ID="side-bar-blade" @bind-IsOpen="isSideBarOpen" Type="(IsDesktopView ? SidebarType.Push : SidebarType.Over)" Target="#main-container" Position="SidebarPosition.Right">
         <ChildContent>
-            <SfCard role="region">
-                @if (damageContext is not null)
-                {
-                    foreach (var item in damageContext.Sections)
+            @if (damageContext is not null)
+            {
+                <SfCard role="region">
+                    @foreach (var item in damageContext.Sections)
                         if (!string.IsNullOrWhiteSpace(item.Entry))
                         {
                             <CardContent EnableSeparator="true">
@@ -61,22 +61,27 @@
                                 <div>@item.Entry</div>
                             </CardContent>
                         }
+                </SfCard>
+                <div id="form-buttons">
+                    <SfButton type="button" Content="Show Images"
+                              IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Left" IsPrimary="true"
+                              CssClass="@(damageContext.IsProcessed == true ? "e-outline" : "")"
+                              OnClick="OnSubmit">
+                    </SfButton>
+                    <SfButton type="button" Content="Edit Details"
+                              IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
+                              CssClass="@(damageContext.IsProcessed == true ? "e-outline" : "")"
+                              OnClick="OnSubmit">
+                    </SfButton>
+                </div>
+                @if (isVendor)
+                {
+                    <div>picture list</div>
                 }
-            </SfCard>
-            <div id="form-buttons">
-                <SfButton type="button" Content="Run Review"
-                          IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
-                          CssClass="@((damageContext?.IsProcessed == true ? "e-outline" : ""))"
-                          OnClick="OnSubmit">
-                </SfButton>
-            </div>
-            @if (isVendor)
-            {
-                <div>picture list</div>
-            }
-            else
-            {
-                <div>picture list drop</div>
+                else
+                {
+                    <FileUpload damageId="damageContext.Id"></FileUpload>
+                }
             }
         </ChildContent>
     </SfSidebar>
@@ -162,7 +167,7 @@
     {
         if (!isVendor)
         {
-            await dialogService.AlertAsync(null, damageContext.DateOfLoss.ToString("G"), new DialogOptions
+            await dialogService.AlertAsync(null, "ssssss", new DialogOptions
             {
                 ShowCloseIcon = true,
                 PrimaryButtonOptions = new DialogButtonOptions
@@ -171,8 +176,8 @@
                 },
                 ChildContent = builder =>
                 {
-                    builder.OpenComponent<DamageForm>(0);
-                    builder.AddAttribute(1, "DamageContext", damageContext);
+                    builder.OpenComponent<PictureList>(0);
+                    builder.AddAttribute(1, "DamageId", damageContext.Id);
                     builder.CloseComponent();
                 }
             });
