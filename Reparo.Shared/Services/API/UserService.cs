@@ -160,6 +160,13 @@ public sealed class UserService : BaseService, IUserService
     {
         ArgumentNullException.ThrowIfNull(user);
 
+        var existingUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == user.Id, ct);
+        if (existingUser is null) throw new InvalidOperationException($"User with id {user.Id} was not found.");
+
+        existingUser.VendorId = user.VendorId;
+        existingUser.Email = user.Email;
+        existingUser.PhoneNumber = user.PhoneNumber;
+
         var existingUserRoles = await _context.UserRoles.Where(ur => ur.UserId == user.Id).ToListAsync(ct);
 
         if (existingUserRoles.Count > 0)

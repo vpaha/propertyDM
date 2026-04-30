@@ -163,10 +163,10 @@
 
     private async Task RefreshPageAsync(AppUser user)
     {
+        await userService.UpdateUserAsync(user);
+
         var authState = await authStateTask;
         await userService.ProvisionAsync(authState.User);
-
-        await userService.UpdateUserAsync(user);
 
         refreshVersion++;
         StateHasChanged();

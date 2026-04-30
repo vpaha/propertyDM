@@ -148,9 +148,19 @@
         {
             var authState = await authStateTask;
             var result = await authz.AuthorizeAsync(authState.User, "Vendor");
-            isVendor = result.Succeeded;
-            
-            damageList = await damageRepo.ListDamageEntriesAsync(isVendor, CancellationToken.None);
+
+            int? vendorId = null;
+            if (result.Succeeded)
+            {
+                isVendor = true;
+
+                var value = authState.User.FindFirst("vendor_id")?.Value;
+                if (int.TryParse(value, out var parsedId))
+                {
+                    vendorId = parsedId;
+                }
+            }
+            damageList = await damageRepo.ListDamageEntriesAsync(vendorId, CancellationToken.None);
         } catch (Exception ex)
         {
             toastService.ShowError(ex.Message);

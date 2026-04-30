@@ -83075,3 +83075,6 @@ main {
   background: #fff;
   color: #333333 !important;
 }
+.e-toast-container .e-toast .e-toast-close-icon {
+  color: #333333 !important;
+}

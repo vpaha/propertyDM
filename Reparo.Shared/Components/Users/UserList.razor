@@ -20,8 +20,8 @@
     <GridColumns>
         <GridColumn Field="@nameof(AppUser.UserName)" HeaderText="User name" IsPrimaryKey="true" AllowEditing="false"></GridColumn>
         <GridColumn Field="@nameof(AppUser.ProviderDisplayName)" HeaderText="Provider" AllowEditing="false"></GridColumn>
-        <GridColumn Field="@nameof(AppUser.Email)" HeaderText="Email"></GridColumn>
-        <GridColumn Field="@nameof(AppUser.PhoneNumber)" HeaderText="Phone number"></GridColumn>
+        <GridColumn Field="@nameof(AppUser.Email)" HeaderText="Email" ValidationRules="@(new ValidationRules { Email = true })"></GridColumn>
+        <GridColumn Field="@nameof(AppUser.PhoneNumber)" HeaderText="Phone number" ValidationRules="@(new ValidationRules { RegexPattern = @"^\+?[0-9\-\(\)\s]{7,20}$" })"></GridColumn>
         <GridColumn Field="@nameof(AppUser.RoleNames)" HeaderText="Roles">
             <Template>
                 @{
@@ -63,7 +63,7 @@
             AppUser user = args.Data;
 
             if (args.Data?.Roles?.FirstOrDefault(x => x.Name == "vendor") is not null && args.Data.VendorId is null)
-            {                
+            {
                 VendorModel? selectedVendor = null;
 
                 bool isConfirm = await dialogService.ConfirmAsync(null, "Select a vendor", new DialogOptions
@@ -91,7 +91,8 @@
                         builder.CloseComponent();
                     }
                 });
-                if (isConfirm) {
+                if (isConfirm)
+                {
                     if (selectedVendor is null)
                     {
                         toastService.ShowWarning("No vendor selected.");
