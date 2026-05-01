@@ -417,4 +417,4 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
-wwwroot/Images/*
+Reparo.Host/wwwroot/Images/*
