@@ -72,11 +72,12 @@
                         <SfButton type="button"
                                   OnClick="OnChat"
                                   IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
-                                  CssClass="@(damageContext?.IsProcessed==true ? "" : "e-outline")"
+                                  CssClass="e-outline"
                                   Content="Chat">
                         </SfButton>
                     }
-                    else {
+                    else
+                    {
                         <SfButton type="button" Content="Edit Details"
                                   IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
                                   CssClass="e-outline"
@@ -176,11 +177,11 @@
             CssClass = "popup-dialog",
             PrimaryButtonOptions = new DialogButtonOptions
             {
-                Content = "Submit the Report", IconCss = "e-icons e-check-large"
+                Content = "Submit the changes", IconCss = "e-icons e-check-large"
             },
             CancelButtonOptions = new DialogButtonOptions
             {
-                Content = "Close", IconCss = "e-icons e-close"
+                Content = "Cancel", IconCss = "e-icons e-close"
             },
             AnimationSettings = new DialogAnimationOptions
             {
