@@ -1,4 +1,15 @@
-﻿<SfCard role="link">
+﻿@inject SfDialogService dialogService
+@inject IVendorRepo vendorRepo
+
+<SfDialog Width="90vw" ShowCloseIcon="true" @bind-Visible="IsSearchDialogOpen">
+    <DialogTemplates>
+        <Header>Search contractors</Header>
+        <Content>
+            <GoogleMap Latitude="DamageContext.Latitude" Longitude="DamageContext.Longitude" OnSelectionEvent="SelectedVendor" />
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+<SfCard role="link">
     <CardContent EnableSeparator="true">
         <div class="spread-across">
             <div id="damage-summary">
@@ -25,11 +36,22 @@
     <CardContent EnableSeparator="true">
         <div class="spread-across">
             <div>
-                Vendors looking at it:
-                <SfButton type="button" Content="Select Vendor"
-                          IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
-                          CssClass="e-outline">
-                </SfButton>
+                <SfAppBar>
+                    @if (DamageContext.Vendor is not null)
+                    {
+                        <SfButton CssClass="e-success e-outline" OnClick="ShowVendor" IconCss="sf-icon-transport">Selected vendor</SfButton>
+                        <span style="margin-left:10px;">@DamageContext.Vendor.Name</span>
+                        <div style="flex-grow:1"></div>
+                        <SfButton CssClass="e-link" OnClick="RemoveVendor" IconCss="e-icons e-close" title="Clear"></SfButton>
+                    }
+                    else
+                    {
+                        <h3>No Contractor is selected</h3>
+                        <SfButton type="button" CssClass="e-success e-outline" OnClick="toggleSearch"
+                                  Content="Find a local contractor" IconCss="e-icons e-search"
+                                  IconPosition="IconPosition.Right"></SfButton>
+                    }
+                </SfAppBar>                
             </div>
             <SfButton type="button"
                       OnClick="OnChat"
@@ -40,7 +62,7 @@
         </div>
     </CardContent>
     <CardContent EnableSeparator="true">
-        Insurance coverage:
+        <Coverage damageContext="DamageContext"></Coverage>
     </CardContent>
 </SfCard>
 <style>
@@ -55,9 +77,55 @@
     [Parameter] public bool IsBladeOpen { get; set; } = default!;
     [Parameter] public EventCallback<DamageEntry> OnToggleBladeEvent { get; set; }
 
+    private bool IsSearchDialogOpen;
+
     private async Task ToggleBlade()
     {
         await OnToggleBladeEvent.InvokeAsync(DamageContext);
+    }
+
+    private async Task ShowVendor()
+    {
+        await dialogService.AlertAsync(null, DamageContext.Vendor?.Name, new DialogOptions
+        {
+            ShowCloseIcon = true,
+            PrimaryButtonOptions = new DialogButtonOptions
+            {
+                Content = "Close"
+            },
+            ChildContent = builder =>
+            {
+                builder.OpenComponent<Vendor>(0);
+                builder.AddAttribute(1, "PlaceId", DamageContext.Vendor?.PlaceId);
+                builder.CloseComponent();
+            }
+        });
+    }
+
+    private async Task RemoveVendor()
+    {
+        DamageContext.Vendor = null;
+        DamageContext.VendorId = null;
+        StateHasChanged();
+    }
+
+    private async Task toggleSearch()
+    {
+        IsSearchDialogOpen = true;
+    }
+
+    private async Task SelectedVendor(string placeId)
+    {
+        try
+        {
+            DamageContext.Vendor = await vendorRepo.GetVendorByPlaceAsync(placeId);
+            DamageContext.VendorId = DamageContext.Vendor?.Id;
+        } catch (Exception)
+        {
+        } finally
+        {
+            IsSearchDialogOpen = false;
+        }
     }
 
     private async Task OnChat()

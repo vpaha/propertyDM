@@ -83085,3 +83085,7 @@ main:has(.show-image) {
 .e-toast-container .e-toast .e-toast-close-icon {
   color: #333333 !important;
 }
+
+.e-icon-dlg-close {
+  color: white !important;
+}
