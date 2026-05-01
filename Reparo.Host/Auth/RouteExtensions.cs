@@ -193,12 +193,19 @@ internal static class RouteExtensions
             return result;
         });
 
-        group.MapGet("damage-entries", async (HttpContext http, [FromServices] IDamageService repo, [FromQuery] int? vendor, CancellationToken ct) =>
-        {
-            int? userId = null;
-            if (!vendor.HasValue) userId = http.User.GetUserId();
+        group.MapGet("vendor-damage-entries",async (HttpContext http,[FromServices] IDamageService repo, CancellationToken ct) =>
+            {
+                var vendorId = http.User.GetVendorId();
+                if (vendorId is null) return Results.Unauthorized();
 
-            var entries = await repo.ListDamageUserEntriesAsync(userId, vendor, ct);
+                var entries = await repo.ListVendorDamageEntriesAsync(vendorId.Value, ct);
+                return Results.Ok(entries);
+            });
+
+        group.MapGet("user-damage-entries", async (HttpContext http, [FromServices] IDamageService repo, CancellationToken ct) =>
+        {
+            var userId = http.User.GetUserId();
+            var entries = await repo.ListUserDamageEntriesAsync(userId, ct);
             return Results.Ok(entries);
         });
 

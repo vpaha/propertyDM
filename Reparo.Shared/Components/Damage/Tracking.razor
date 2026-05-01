@@ -35,30 +35,23 @@
     </CardContent>
     <CardContent EnableSeparator="true">
         <div class="spread-across">
-            <div>
-                <SfAppBar>
-                    @if (DamageContext.Vendor is not null)
-                    {
-                        <SfButton CssClass="e-success e-outline" OnClick="ShowVendor" IconCss="sf-icon-transport">Selected vendor</SfButton>
-                        <span style="margin-left:10px;">@DamageContext.Vendor.Name</span>
-                        <div style="flex-grow:1"></div>
-                        <SfButton CssClass="e-link" OnClick="RemoveVendor" IconCss="e-icons e-close" title="Clear"></SfButton>
-                    }
-                    else
-                    {
-                        <h3>No Contractor is selected</h3>
-                        <SfButton type="button" CssClass="e-success e-outline" OnClick="toggleSearch"
-                                  Content="Find a local contractor" IconCss="e-icons e-search"
-                                  IconPosition="IconPosition.Right"></SfButton>
-                    }
-                </SfAppBar>                
-            </div>
-            <SfButton type="button"
-                      OnClick="OnChat"
-                      IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
-                      CssClass="e-outline"
-                      Content="Chat">
-            </SfButton>
+            @if (DamageContext.Vendor is not null)
+            {
+                <SfButton CssClass="e-success e-outline" OnClick="ShowVendor" IconCss="sf-icon-transport">@DamageContext.Vendor.Name</SfButton>
+                <SfButton type="button"
+                              OnClick="OnChat"
+                              IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
+                              CssClass="e-outline"
+                              Content="Chat">
+                    </SfButton>
+            }
+            else
+            {
+                <h3>No Contractor is selected</h3>
+                <SfButton type="button" CssClass="e-success e-outline" OnClick="toggleSearch"
+                          Content="Find a local contractor" IconCss="e-icons e-search"
+                          IconPosition="IconPosition.Right"></SfButton>
+            }
         </div>
     </CardContent>
     <CardContent EnableSeparator="true">

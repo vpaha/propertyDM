@@ -1,6 +1,9 @@
-﻿@inject IJSRuntime jSRuntime
+﻿@using Microsoft.Extensions.Hosting;
+
+@inject IJSRuntime jSRuntime
 @inject SfDialogService dialogService
 @inject NavigationManager nav
+@inject IHostEnvironment environment
 
 @implements IAsyncDisposable
 
@@ -39,7 +42,10 @@
             _objRef = DotNetObjectReference.Create(this);
 
             await jSRuntime.InvokeVoidAsync("googleMap.initMap", "nearbymap", Latitude, Longitude, 16, _objRef);
-            await jSRuntime.InvokeVoidAsync("googleMap.searchPlaces", Latitude, Longitude);
+            if (!environment.IsDevelopment())
+            {
+                await jSRuntime.InvokeVoidAsync("googleMap.searchPlaces", Latitude, Longitude);
+            }
         }
     }
 

@@ -6,7 +6,8 @@ public interface IDamageService
     void InvalidateCache();
 
     Task<IReadOnlyList<DamageSectionType>> ListSectionTypesAsync(CancellationToken ct = default);
-    Task<IReadOnlyList<DamageEntry>> ListDamageUserEntriesAsync(int? userId, int? vendorId, CancellationToken ct = default);
+    Task<IReadOnlyList<DamageEntry>> ListUserDamageEntriesAsync(int? userId, CancellationToken ct = default);
+    Task<IReadOnlyList<DamageEntry>> ListVendorDamageEntriesAsync(int vendorId, CancellationToken ct = default);
     Task<long> AddEntryAsync(DamageEntry entry, CancellationToken ct = default);
     Task<long> UpdateEntryAsync(DamageEntry entry, CancellationToken ct = default);
 }
@@ -32,25 +33,24 @@ public sealed class DamageService : IDamageService
 
     public void InvalidateCache() => _cache.Remove(CacheKey);
 
-    public async Task<IReadOnlyList<DamageEntry>> ListDamageUserEntriesAsync(int? userId, int? vendorId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<DamageEntry>> ListUserDamageEntriesAsync(int? userId, CancellationToken ct = default)
     {
         var query = _context.DamageEntries.AsNoTracking().Include(e => e.Sections).ThenInclude(s => s.DamageSectionType)
-            .AsSplitQuery().AsQueryable();
+            .Include(e => e.Vendor)
+            .AsSplitQuery();
 
-        if (vendorId.HasValue)
-        {
-            query = query.Where(e => e.VendorId == vendorId.Value);
-        }
-        else if (userId.HasValue)
-        {
-            query = query.Where(e => e.UserId == userId.Value);
-        }
-        else
-        {
-            query = query.Where(e => e.UserId == null);
-        }
+        query = userId.HasValue
+            ? query.Where(e => e.UserId == userId.Value)
+            : query.Where(e => e.UserId == null);
+
         return await query.OrderByDescending(e => e.CreatedAt).ToListAsync(ct);
     }
+
+    public async Task<IReadOnlyList<DamageEntry>> ListVendorDamageEntriesAsync(int vendorId, CancellationToken ct = default)
+    {
+        return await _context.DamageEntries.AsNoTracking().Where(e => e.VendorId == vendorId).Include(e => e.Sections).ThenInclude(s => s.DamageSectionType).OrderByDescending(e => e.CreatedAt).ToListAsync(ct);
+    }
+
     public async Task<IReadOnlyList<DamageSectionType>> ListSectionTypesAsync(CancellationToken ct = default)
     {
         if (_cache.TryGetValue(CacheKey, out IReadOnlyList<DamageSectionType>? cached) && cached is not null)

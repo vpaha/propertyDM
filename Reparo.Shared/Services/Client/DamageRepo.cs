@@ -3,7 +3,9 @@
 public interface IDamageRepo
 {
     Task<IReadOnlyList<DamageSectionType>> ListSectionTypesAsync(CancellationToken ct = default);
-    Task<IReadOnlyList<DamageEntry>> ListDamageEntriesAsync(int? vendor, CancellationToken ct = default);
+    Task<IReadOnlyList<DamageEntry>> ListVendorDamageEntriesAsync(CancellationToken ct = default);
+    Task<IReadOnlyList<DamageEntry>> ListUserDamageEntriesAsync(CancellationToken ct = default);
+
     Task<long> AddEntryAsync(DamageEntry entry, CancellationToken ct = default);
     Task<long> UpdateEntryAsync(DamageEntry entry, CancellationToken ct = default);
 }
@@ -23,10 +25,15 @@ public sealed class DamageRepo : IDamageRepo
         return list ?? Array.Empty<DamageSectionType>();
     }
 
-    public async Task<IReadOnlyList<DamageEntry>> ListDamageEntriesAsync(int? vendor, CancellationToken ct = default)
+    public async Task<IReadOnlyList<DamageEntry>> ListVendorDamageEntriesAsync(CancellationToken ct = default)
     {
-        var url = vendor.HasValue ? $"damage/damage-entries?vendor={vendor.Value}" : "damage/damage-entries";
-        var list = await _http.GetFromJsonAsync<IReadOnlyList<DamageEntry>>(url, ct);
+        var list = await _http.GetFromJsonAsync<IReadOnlyList<DamageEntry>>("damage/vendor-damage-entries", ct);
+        return list ?? Array.Empty<DamageEntry>();
+    }
+
+    public async Task<IReadOnlyList<DamageEntry>> ListUserDamageEntriesAsync(CancellationToken ct = default)
+    {
+        var list = await _http.GetFromJsonAsync<IReadOnlyList<DamageEntry>>("damage/user-damage-entries", ct);
         return list ?? Array.Empty<DamageEntry>();
     }
 

@@ -85,7 +85,7 @@
     #side-bar-blade {
         border: solid 1px grey;
         border-radius: 8px;
-        max-width: 25vw;
+        max-width: 30vw;
         padding: 6px 10px 6px 10px;
     }
 
@@ -126,13 +126,11 @@
             var result = await authz.AuthorizeAsync(authState.User, "Vendor");
             isVendor = result.Succeeded;
 
-            int? vendorId = null;
             if (isVendor)
-            {
-                var value = authState.User.FindFirst("vendor_id")?.Value;
-                if (int.TryParse(value, out var parsedId)) vendorId = parsedId;
-            }
-            damageList = await damageRepo.ListDamageEntriesAsync(vendorId, CancellationToken.None);
+                damageList = await damageRepo.ListVendorDamageEntriesAsync(CancellationToken.None);
+            else
+                damageList = await damageRepo.ListUserDamageEntriesAsync(CancellationToken.None);
+
         } catch (Exception ex)
         {
             toastService.ShowError(ex.Message);
