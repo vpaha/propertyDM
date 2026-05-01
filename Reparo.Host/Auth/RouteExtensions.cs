@@ -229,7 +229,7 @@ internal static class RouteExtensions
 
         group.MapGet("vendor-get", async ([FromServices] IVendorService repo, [FromQuery] string placeId, CancellationToken ct) =>
         {
-            var vendor = await repo.GetVendorAsync(placeId, null, ct);
+            var vendor = await repo.GetVendorByPlaceAsync(placeId, ct);
             return vendor is null ? Results.NotFound() : Results.Ok(vendor);
         });
 
@@ -264,7 +264,9 @@ internal static class RouteExtensions
         group.MapGet("vendor-profile", async (HttpContext http, [FromServices] IVendorService repo, CancellationToken ct) =>
         {
             var vendorId = http.User.GetVendorId();
-            var vendor = await repo.GetVendorAsync(null, vendorId, ct);
+            if (vendorId is null) return Results.Unauthorized();
+
+            var vendor = await repo.GetVendorAsync(vendorId.Value, ct);
             return vendor is null ? Results.NotFound() : Results.Ok(vendor);
         }).RequireAuthorization("Vendor");
 

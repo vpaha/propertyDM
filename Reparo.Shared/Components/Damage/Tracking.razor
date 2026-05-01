@@ -47,10 +47,10 @@
             }
             else
             {
-                <h3>No Contractor is selected</h3>
                 <SfButton type="button" CssClass="e-success e-outline" OnClick="toggleSearch"
                           Content="Find a local contractor" IconCss="e-icons e-search"
                           IconPosition="IconPosition.Right"></SfButton>
+                <h3>No Contractor is selected</h3>
             }
         </div>
     </CardContent>
@@ -88,8 +88,8 @@
             },
             ChildContent = builder =>
             {
-                builder.OpenComponent<Vendor>(0);
-                builder.AddAttribute(1, "PlaceId", DamageContext.Vendor?.PlaceId);
+                builder.OpenComponent<VendorDetails>(0);
+                builder.AddAttribute(1, "Vendor", DamageContext.Vendor);
                 builder.CloseComponent();
             }
         });

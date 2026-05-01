@@ -2,7 +2,8 @@
 
 public interface IVendorService
 {
-    Task<VendorModel?> GetVendorAsync(string? placeId, int? vendorId, CancellationToken cancellationToken = default);
+    Task<VendorModel?> GetVendorByPlaceAsync(string placeId, CancellationToken cancellationToken = default);
+    Task<VendorModel?> GetVendorAsync(int vendorId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<VendorModel>> GetVendorListAsync(CancellationToken cancellationToken = default);
 
     // not used
@@ -20,16 +21,14 @@ public sealed class VendorService : IVendorService
         _context = context;
     }
 
-    public async Task<VendorModel?> GetVendorAsync(string? placeId,int? vendorId,CancellationToken cancellationToken = default)
+    public async Task<VendorModel?> GetVendorByPlaceAsync(string placeId, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(placeId) && !vendorId.HasValue) return null;
+        return await _context.Set<VendorModel>().AsNoTracking().Where(e => e.PlaceId == placeId).FirstOrDefaultAsync(cancellationToken);
+    }
 
-        var query = _context.Set<VendorModel>().AsNoTracking().AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(placeId)) query = query.Where(e => e.PlaceId == placeId);
-        if (vendorId.HasValue) query = query.Where(e => e.Id == vendorId.Value);
-
-        return await query.FirstOrDefaultAsync(cancellationToken);
+    public async Task<VendorModel?> GetVendorAsync(int vendorId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Set<VendorModel>().AsNoTracking().Where(e => e.Id == vendorId).FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<VendorModel>> GetVendorListAsync(CancellationToken cancellationToken = default)
