@@ -4,10 +4,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Net.Http.Headers;
-using Stripe;
-using Stripe.Checkout;
 using System.Globalization;
 
 internal static class RouteExtensions
@@ -223,7 +220,7 @@ internal static class RouteExtensions
             return Results.Ok(id);
         });
 
-        group.MapGet("vendor-get", async (HttpContext http, [FromServices] IVendorService repo, [FromQuery] string placeId, CancellationToken ct) =>
+        group.MapGet("vendor-get", async ([FromServices] IVendorService repo, [FromQuery] string placeId, CancellationToken ct) =>
         {
             var vendor = await repo.GetVendorAsync(placeId, null, ct);
             return vendor is null ? Results.NotFound() : Results.Ok(vendor);
@@ -264,7 +261,7 @@ internal static class RouteExtensions
             return vendor is null ? Results.NotFound() : Results.Ok(vendor);
         }).RequireAuthorization("Vendor");
 
-        group.MapGet("vendor-list", async (HttpContext http, [FromServices] IVendorService repo, CancellationToken ct) =>
+        group.MapGet("vendor-list", async ([FromServices] IVendorService repo, CancellationToken ct) =>
         {
             var entries = await repo.GetVendorListAsync(ct);
             if (entries == null) return Results.NotFound();

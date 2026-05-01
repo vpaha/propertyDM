@@ -65,20 +65,26 @@
                 <div id="form-buttons">
                     <SfButton type="button" Content="Show Images"
                               IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Left" IsPrimary="true"
-                              CssClass="@(damageContext.IsProcessed == true ? "e-outline" : "")"
-                              OnClick="OnSubmit">
+                              OnClick="OnShowImages">
                     </SfButton>
-                    <SfButton type="button" Content="Edit Details"
-                              IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
-                              CssClass="@(damageContext.IsProcessed == true ? "e-outline" : "")"
-                              OnClick="OnSubmit">
-                    </SfButton>
+                    @if (isVendor)
+                    {
+                        <SfButton type="button"
+                                  OnClick="OnChat"
+                                  IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
+                                  CssClass="@(damageContext?.IsProcessed==true ? "" : "e-outline")"
+                                  Content="Chat">
+                        </SfButton>
+                    }
+                    else {
+                        <SfButton type="button" Content="Edit Details"
+                                  IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
+                                  CssClass="e-outline"
+                                  OnClick="OnEdit">
+                        </SfButton>
+                    }
                 </div>
-                @if (isVendor)
-                {
-                    <div>picture list</div>
-                }
-                else
+                @if (!isVendor)
                 {
                     <FileUpload damageId="damageContext.Id"></FileUpload>
                 }
@@ -163,29 +169,59 @@
         toggleBar();
     }
 
-    private async Task OnSubmit()
+    private async Task OnEdit()
     {
-        if (!isVendor)
+        bool isConfirm = await dialogService.ConfirmAsync(null, damageContext.DateOfLoss.ToString("D"), new DialogOptions
         {
-            await dialogService.AlertAsync(null, "ssssss", new DialogOptions
+            CssClass = "popup-dialog",
+            PrimaryButtonOptions = new DialogButtonOptions
             {
-                ShowCloseIcon = true,
-                PrimaryButtonOptions = new DialogButtonOptions
-                {
-                    Content = "Close"
-                },
-                ChildContent = builder =>
-                {
-                    builder.OpenComponent<PictureList>(0);
-                    builder.AddAttribute(1, "DamageId", damageContext.Id);
-                    builder.CloseComponent();
-                }
-            });
+                Content = "Submit the Report", IconCss = "e-icons e-check-large"
+            },
+            CancelButtonOptions = new DialogButtonOptions
+            {
+                Content = "Close", IconCss = "e-icons e-close"
+            },
+            AnimationSettings = new DialogAnimationOptions
+            {
+                Effect = DialogEffect.Zoom
+            },
+            ChildContent = builder =>
+            {
+                builder.OpenComponent<DamageForm>(0);
+                builder.AddAttribute(1, "damageContext", damageContext);
+                builder.CloseComponent();
+            }
+        });
+        if (isConfirm)
+        {
+            await damageRepo.UpdateEntryAsync(damageContext, CancellationToken.None);
+            StateHasChanged();
         }
-        // damageContext.IsProcessed = true;
-        // if (isVendor)
-        //     await vendorRepo.UpdateEntryAsync(damageContext, CancellationToken.None);
-        // else
-        //     await damageRepo.UpdateEntryAsync(damageContext, CancellationToken.None);
+    }
+
+    private async Task OnShowImages()
+    {
+        await dialogService.AlertAsync(null, damageContext.DateOfLoss.ToString("D"), new DialogOptions
+        {
+            Width = "90vw",
+            Height = "90vh",
+            ShowCloseIcon = true,
+            PrimaryButtonOptions = new DialogButtonOptions
+            {
+                Content = "Close"
+            },
+            ChildContent = builder =>
+            {
+                builder.OpenComponent<PictureList>(0);
+                builder.AddAttribute(1, "DamageId", damageContext.Id);
+                builder.CloseComponent();
+            }
+        });
+    }
+
+    private async Task OnChat()
+    {
+        
     }
 }

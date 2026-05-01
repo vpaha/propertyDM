@@ -2,7 +2,6 @@
     <CardHeader>
         <h2>Image Upload</h2>
     </CardHeader>
-
     <CardContent>
         <SfUploader ID="UploadFiles"
                     AutoUpload="true"
@@ -11,9 +10,7 @@
                     MaxFileSize="104857600"
                     EnableHtmlSanitizer="true"
                     EnablePersistence="true">
-
-            <UploaderEvents ValueChange="OnChange" />
-
+            <UploaderEvents ValueChange="OnChange" OnRemove="OnRemove" />
         </SfUploader>
     </CardContent>
 </SfCard>
@@ -25,11 +22,7 @@
 
     protected override void OnParametersSet()
     {
-        uploadDirectory = Path.Combine(
-            Environment.WebRootPath,
-            "Logs",
-            DamageId.ToString());
-
+        uploadDirectory = Path.Combine("wwwroot", "Images", DamageId.ToString());
         Directory.CreateDirectory(uploadDirectory);
     }
 
@@ -37,25 +30,21 @@
     {
         foreach (var file in args.Files)
         {
-            try
-            {
-                var fileName = Path.GetFileName(file.FileInfo.Name);
-                var filePath = Path.Combine(uploadDirectory, fileName);
+            var fileName = Path.GetFileName(file.FileInfo.Name);
+            var filePath = Path.Combine(uploadDirectory, fileName);
 
-                await using var fileStream = new FileStream(
-                    filePath,
-                    FileMode.Create,
-                    FileAccess.Write,
-                    FileShare.None);
+            await using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
+            await file.File.OpenReadStream(long.MaxValue).CopyToAsync(fileStream);
+        }
+    }
 
-                await file.File
-                    .OpenReadStream(100 * 1024 * 1024)
-                    .CopyToAsync(fileStream);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Image upload failed: {ex.Message}");
-            }
+    private async Task OnRemove(RemovingEventArgs args)
+    {
+        foreach (var file in args.FilesData)
+        {
+            var fileName = Path.GetFileName(file.Name);
+            var filePath = Path.Combine(uploadDirectory, fileName);
+            if (File.Exists(filePath)) File.Delete(filePath);
         }
     }
 }
