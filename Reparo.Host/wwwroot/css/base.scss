@@ -95,6 +95,11 @@ h5 {
     row-gap: 0px;
 }
 
+.spread-across {
+    display: flex;
+    justify-content: space-between;
+}
+
 .e-dlg-content {
     background-color: #DCDCDC !important;
 }

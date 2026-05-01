@@ -2,7 +2,9 @@
 
 <SfCard role="region">
     <CardHeader>
-        User: @user.Identity?.Name
+        <h3>
+            User: @user.Identity?.Name
+        </h3>
     </CardHeader>
     <CardContent EnableSeparator="true">
         <div style="padding-bottom:14px;">Auth Type: @user.Identity?.AuthenticationType</div>

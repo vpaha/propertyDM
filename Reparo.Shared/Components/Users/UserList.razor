@@ -2,47 +2,53 @@
 @inject SfDialogService dialogService
 @inject ToastService toastService
 
-<h3>User list</h3>
-<SfGrid TValue="AppUser"
-        DataSource="@appUsers"
-        Toolbar="@(new List<string> { "Edit", "Update", "Cancel", "Search" })"
-        AllowPaging="true"
-        AllowReordering="true"
-        AllowSorting="true"
-        ShowColumnMenu="true">
-    <GridEditSettings AllowEditing="true" Mode="EditMode.Normal"></GridEditSettings>
-    <GridPageSettings PageSize="GridConstants.RowCount" PageSizes="GridConstants.PageSizes"></GridPageSettings>
-    <GridSearchSettings Fields="@(new[] { nameof(AppUser.UserName), nameof(AppUser.Email), nameof(AppUser.ProviderDisplayName) })"
-                        Operator="Syncfusion.Blazor.Operator.Contains"
-                        IgnoreCase="true"
-                        IgnoreAccent="true">
-    </GridSearchSettings>
-    <GridColumns>
-        <GridColumn Field="@nameof(AppUser.UserName)" HeaderText="User name" IsPrimaryKey="true" AllowEditing="false"></GridColumn>
-        <GridColumn Field="@nameof(AppUser.ProviderDisplayName)" HeaderText="Provider" AllowEditing="false"></GridColumn>
-        <GridColumn Field="@nameof(AppUser.Email)" HeaderText="Email" ValidationRules="@(new ValidationRules { Email = true })"></GridColumn>
-        <GridColumn Field="@nameof(AppUser.PhoneNumber)" HeaderText="Phone number" ValidationRules="@(new ValidationRules { RegexPattern = @"^\+?[0-9\-\(\)\s]{7,20}$" })"></GridColumn>
-        <GridColumn Field="@nameof(AppUser.RoleNames)" HeaderText="Roles">
-            <Template>
-                @{
-                    var user = (AppUser)context;
-                    <span>@string.Join(", ", user.RoleNames)</span>
-                }
-            </Template>
-            <EditTemplate>
-                @{
-                    var user = (AppUser)context;
-                    <SfMultiSelect TItem="AppRole" TValue="AppRole[]" DataSource="@availableRoles" @bind-Value="user.Roles"
-                                   Placeholder="Select roles" Mode="VisualMode.Box" ShowDropDownIcon="true"
-                                   AllowFiltering="true" ShowClearButton="true">
-                        <MultiSelectFieldSettings Text="Name" Value="Id" />
-                    </SfMultiSelect>
-                }
-            </EditTemplate>
-        </GridColumn>
-    </GridColumns>
-    <GridEvents TValue="AppUser" OnActionBegin="OnActionBegin"></GridEvents>
-</SfGrid>
+<SfCard role="region">
+    <CardHeader>
+        <h3>User list</h3>
+    </CardHeader>
+    <CardContent>
+        <SfGrid TValue="AppUser"
+                DataSource="@appUsers"
+                Toolbar="@(new List<string> { "Edit", "Update", "Cancel", "Search" })"
+                AllowPaging="true"
+                AllowReordering="true"
+                AllowSorting="true"
+                ShowColumnMenu="true">
+            <GridEditSettings AllowEditing="true" Mode="EditMode.Normal"></GridEditSettings>
+            <GridPageSettings PageSize="GridConstants.RowCount" PageSizes="GridConstants.PageSizes"></GridPageSettings>
+            <GridSearchSettings Fields="@(new[] { nameof(AppUser.UserName), nameof(AppUser.Email), nameof(AppUser.ProviderDisplayName) })"
+                                Operator="Syncfusion.Blazor.Operator.Contains"
+                                IgnoreCase="true"
+                                IgnoreAccent="true">
+            </GridSearchSettings>
+            <GridColumns>
+                <GridColumn Field="@nameof(AppUser.UserName)" HeaderText="User name" IsPrimaryKey="true" AllowEditing="false"></GridColumn>
+                <GridColumn Field="@nameof(AppUser.ProviderDisplayName)" HeaderText="Provider" AllowEditing="false"></GridColumn>
+                <GridColumn Field="@nameof(AppUser.Email)" HeaderText="Email" ValidationRules="@(new ValidationRules { Email = true })"></GridColumn>
+                <GridColumn Field="@nameof(AppUser.PhoneNumber)" HeaderText="Phone number" ValidationRules="@(new ValidationRules { RegexPattern = @"^\+?[0-9\-\(\)\s]{7,20}$" })"></GridColumn>
+                <GridColumn Field="@nameof(AppUser.RoleNames)" HeaderText="Roles">
+                    <Template>
+                        @{
+                            var user = (AppUser)context;
+                            <span>@string.Join(", ", user.RoleNames)</span>
+                        }
+                    </Template>
+                    <EditTemplate>
+                        @{
+                            var user = (AppUser)context;
+                            <SfMultiSelect TItem="AppRole" TValue="AppRole[]" DataSource="@availableRoles" @bind-Value="user.Roles"
+                                           Placeholder="Select roles" Mode="VisualMode.Box" ShowDropDownIcon="true"
+                                           AllowFiltering="true" ShowClearButton="true">
+                                <MultiSelectFieldSettings Text="Name" Value="Id" />
+                            </SfMultiSelect>
+                        }
+                    </EditTemplate>
+                </GridColumn>
+            </GridColumns>
+            <GridEvents TValue="AppUser" OnActionBegin="OnActionBegin"></GridEvents>
+        </SfGrid>
+    </CardContent>
+</SfCard>
 @code {
     [Parameter]
     public EventCallback<AppUser> RefreshRequested { get; set; }

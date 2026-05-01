@@ -137,6 +137,11 @@ h5 {
   row-gap: 0px;
 }
 
+.spread-across {
+  display: flex;
+  justify-content: space-between;
+}
+
 .e-dlg-content {
   background-color: #DCDCDC !important;
 }
@@ -83051,7 +83056,7 @@ div > .e-pv-bookmark-icon.e-pv-icon.e-right {
   font-size: 20px;
 }
 
-main {
+main:has(.show-image) {
   background-image: url("/room.jpg");
 }
 

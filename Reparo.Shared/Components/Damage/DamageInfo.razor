@@ -1,6 +1,6 @@
 ﻿<SfCard role="link">
     <CardContent>
-        <div id="damage-brief">
+        <div class="spread-across">
             <Description DamageContext="DamageContext"></Description>
             <div>
                 <SfButton type="button" IsPrimary="true" CssClass="e-outline" OnClick="ToggleBlade" Content="@(IsBladeOpen ? "Hide" : "Review damage report")">
@@ -9,23 +9,22 @@
         </div>
     </CardContent>
     <CardContent EnableSeparator="true">
-        <SfButton type="button"
-                  OnClick="OnSubmit"
-                  IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
-                  CssClass="@(DamageContext?.IsProcessed==true ? "" : "e-outline")"
-                  Content="Pick up">
-        </SfButton>
+        <div class="spread-across">
+            <div>
+                Status: Waiting for Vendor Assignment
+            </div>
+            <SfButton type="button"
+                      OnClick="OnSubmit"
+                      IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
+                      CssClass="@(DamageContext?.IsProcessed==true ? "" : "e-outline")"
+                      Content="Proceed with Service">
+            </SfButton>
+        </div>
     </CardContent>
     <CardContent EnableSeparator="true">
         <Estimate></Estimate>
     </CardContent>
 </SfCard>
-<style>
-    #damage-brief {
-        display: flex;
-        justify-content: space-between;
-    }
-</style>
 @code {
     [Parameter] public DamageEntry DamageContext { get; set; } = default!;
     [Parameter] public bool IsBladeOpen { get; set; } = default!;

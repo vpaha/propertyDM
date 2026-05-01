@@ -1,6 +1,6 @@
 ﻿<SfCard role="link">
     <CardContent EnableSeparator="true">
-        <div id="damage-brief">
+        <div class="spread-across">
             <div id="damage-summary">
                 <div>
                     Damage reported on @($"{DamageContext.DateOfLoss:g}")
@@ -23,18 +23,27 @@
         </div>
     </CardContent>
     <CardContent EnableSeparator="true">
-        Vendors looking at it:
+        <div class="spread-across">
+            <div>
+                Vendors looking at it:
+                <SfButton type="button" Content="Select Vendor"
+                          IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
+                          CssClass="e-outline">
+                </SfButton>
+            </div>
+            <SfButton type="button"
+                      OnClick="OnChat"
+                      IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
+                      CssClass="e-outline"
+                      Content="Chat">
+            </SfButton>
+        </div>
     </CardContent>
     <CardContent EnableSeparator="true">
         Insurance coverage:
     </CardContent>
 </SfCard>
 <style>
-    #damage-brief {
-        display: flex;
-        justify-content: space-between;
-    }
-
     #damage-summary {
         display: flex;
         flex-direction: column;
@@ -49,5 +58,9 @@
     private async Task ToggleBlade()
     {
         await OnToggleBladeEvent.InvokeAsync(DamageContext);
+    }
+
+    private async Task OnChat()
+    {
     }
 }

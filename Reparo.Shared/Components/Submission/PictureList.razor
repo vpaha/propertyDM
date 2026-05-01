@@ -1,6 +1,12 @@
 ﻿@using Syncfusion.Blazor.Navigations
 
 <SfCarousel ID="control-container" AnimationEffect="CarouselAnimationEffect.Fade">
+    @if (!Images.Any())
+    {
+        <h2>
+            No images have been uploaded.
+        </h2>
+    }
     @foreach (var image in Images)
     {
         <CarouselItem>

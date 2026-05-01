@@ -1,7 +1,7 @@
 ﻿@import 'base.scss';
 @import 'syncfusion/blazor-themes/SCSS-Themes/bootstrap5-dark.scss';
 
-main {
+main:has(.show-image) {
     background-image: url("/sadhouse.jpg");
 }
 

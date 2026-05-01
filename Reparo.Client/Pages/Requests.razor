@@ -22,7 +22,7 @@
 <section>
     <SfSpinner Size="48" Type="SpinnerType.Material" @bind-Visible="@isLoading"></SfSpinner>
     <SfAppBar role="region">
-        <h1>List of repair requests</h1>
+        <h1>Repair Progress</h1>
     </SfAppBar>
     <SfAppBar role="region">
         <h2>
@@ -63,27 +63,15 @@
                         }
                 </SfCard>
                 <div id="form-buttons">
-                    <SfButton type="button" Content="Show Images"
+                    <SfButton type="button" Content="Damage Details"
+                              IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
+                              CssClass="e-outline"
+                              OnClick="OnEdit">
+                    </SfButton>
+                    <SfButton type="button" Content="View Images"
                               IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Left" IsPrimary="true"
                               OnClick="OnShowImages">
                     </SfButton>
-                    @if (isVendor)
-                    {
-                        <SfButton type="button"
-                                  OnClick="OnChat"
-                                  IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
-                                  CssClass="e-outline"
-                                  Content="Chat">
-                        </SfButton>
-                    }
-                    else
-                    {
-                        <SfButton type="button" Content="Edit Details"
-                                  IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
-                                  CssClass="e-outline"
-                                  OnClick="OnEdit">
-                        </SfButton>
-                    }
                 </div>
                 @if (!isVendor)
                 {
@@ -172,32 +160,60 @@
 
     private async Task OnEdit()
     {
-        bool isConfirm = await dialogService.ConfirmAsync(null, damageContext.DateOfLoss.ToString("D"), new DialogOptions
+        if (isVendor)
         {
-            CssClass = "popup-dialog",
-            PrimaryButtonOptions = new DialogButtonOptions
+            await dialogService.AlertAsync(null, damageContext.DateOfLoss.ToString("D"), new DialogOptions
             {
-                Content = "Submit the changes", IconCss = "e-icons e-check-large"
-            },
-            CancelButtonOptions = new DialogButtonOptions
+                ShowCloseIcon = true,
+                PrimaryButtonOptions = new DialogButtonOptions
+                {
+                    Content = "Close"
+                },
+                AnimationSettings = new DialogAnimationOptions
+                {
+                    Effect = DialogEffect.FlipXUp
+                },
+                ChildContent = builder =>
+                {
+                    builder.OpenComponent<DamageForm>(0);
+                    builder.AddAttribute(1, "damageContext", damageContext);
+                    builder.AddAttribute(2, "isReadOnly", true);
+                    builder.CloseComponent();
+                }
+            });
+        }
+        else
+        {
+            bool isConfirm = await dialogService.ConfirmAsync(null, damageContext.DateOfLoss.ToString("D"), new DialogOptions
             {
-                Content = "Cancel", IconCss = "e-icons e-close"
-            },
-            AnimationSettings = new DialogAnimationOptions
+                CssClass = "popup-dialog",
+                CancelButtonOptions = new DialogButtonOptions
+                {
+                    Content = "Cancel",
+                    IconCss = "e-icons e-close"
+                },
+                PrimaryButtonOptions = new DialogButtonOptions
+                {
+                    Content = "Submit changes",
+                    IconCss = "e-icons e-check-large"
+                },
+                AnimationSettings = new DialogAnimationOptions
+                {
+                    Effect = DialogEffect.SlideTop
+                },
+                ChildContent = builder =>
+                {
+                    builder.OpenComponent<DamageForm>(0);
+                    builder.AddAttribute(1, "damageContext", damageContext);
+                    builder.AddAttribute(2, "isReadOnly", false);
+                    builder.CloseComponent();
+                }
+            });
+            if (isConfirm)
             {
-                Effect = DialogEffect.Zoom
-            },
-            ChildContent = builder =>
-            {
-                builder.OpenComponent<DamageForm>(0);
-                builder.AddAttribute(1, "damageContext", damageContext);
-                builder.CloseComponent();
+                await damageRepo.UpdateEntryAsync(damageContext, CancellationToken.None);
+                StateHasChanged();
             }
-        });
-        if (isConfirm)
-        {
-            await damageRepo.UpdateEntryAsync(damageContext, CancellationToken.None);
-            StateHasChanged();
         }
     }
 
@@ -219,10 +235,5 @@
                 builder.CloseComponent();
             }
         });
-    }
-
-    private async Task OnChat()
-    {
-        
     }
 }

@@ -13,9 +13,9 @@
 
 <PageTitle>Settings</PageTitle>
 
-<section>
+<section class="show-image">
     <SfCard role="region">
-        <CardHeader>Settings</CardHeader>
+        <CardHeader><h1>Settings</h1></CardHeader>
         <CardContent EnableSeparator="true">
             <div class="settings-row">
                 <label for="isdark-check">Switch to dark mode:</label>
@@ -63,19 +63,19 @@
                 <SfNumericTextBox Placeholder="Currency" FloatLabelType="FloatLabelType.Always" TValue="Decimal?" Format="C" aria-label="Currency value" Value="100"></SfNumericTextBox>
             </div>
         </CardContent>
-        <AuthorizeView Policy="Admin">
-            <Authorized>
-                <CardContent EnableSeparator="true">
-                    <UserList RefreshRequested="RefreshPageAsync"></UserList>
-                </CardContent>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView>
-            <Authorized>
-                <UserContextInfo RefreshVersion="refreshVersion"></UserContextInfo>
-            </Authorized>
-        </AuthorizeView>
     </SfCard>
+    <AuthorizeView>
+        <Authorized>
+            <UserContextInfo RefreshVersion="refreshVersion"></UserContextInfo>
+        </Authorized>
+    </AuthorizeView>
+    <AuthorizeView Policy="Admin">
+        <Authorized>
+            <CardContent EnableSeparator="true">
+                <UserList RefreshRequested="RefreshPageAsync"></UserList>
+            </CardContent>
+        </Authorized>
+    </AuthorizeView>
 </section>
 <style>
     .settings-row {

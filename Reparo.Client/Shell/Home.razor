@@ -21,7 +21,7 @@
     }
 </HeadContent>
 
-<section>
+<section id="home-section" class="show-image">
     <SfDataForm EditContext="@EditContext" LabelPosition="FormLabelPosition.Top"
                 ButtonsAlignment="FormButtonsAlignment.Center" EnableFloatingLabel="true">
         <FormValidator>
@@ -55,8 +55,7 @@
                 </h1>
             </SfAppBar>
         }
-        <div id="info-container">
-            <div class="@(IsDesktopView ? "desktop-view" : "mobile-view")">
+        <div class="@(IsDesktopView ? "desktop-view" : "mobile-view")">
                 <SfCard CssClass="zoom-in" role="region">
                     <CardHeader>
                         What We Do
@@ -113,12 +112,11 @@
                     </CardContent>
                 </SfCard>
             </div>
-        </div>
     }
 
 </section>
 <style>
-    #info-container .desktop-view {
+    #home-section .desktop-view {
         display: flex;
         flex-wrap: wrap;
         align-items: flex-start;
@@ -127,18 +125,18 @@
         row-gap: 8px;
     }
 
-    #info-container .mobile-view {
+    #home-section .mobile-view {
         display: flex;
         flex-direction: column;
         flex-basis: 100%;
         row-gap: 2px;
     }
 
-    #info-container .desktop-view .e-card {
+    #home-section .desktop-view .e-card {
         flex-basis: 49%;
     }
 
-    #info-container .flex-container .e-card-content {
+    #home-section .flex-container .e-card-content {
         display: flex;
     }
 </style>

@@ -1,7 +1,13 @@
 ﻿@if (DamageContext is not null)
 {
     <div id="damage-summary">
-        <div>Damage reported</div>
+        <div>Damage reported:</div>
+        @if (DamageContext.DateOfLoss != default)
+        {
+            <div>
+                <strong>@($"{DamageContext.DateOfLoss:G}")</strong>
+            </div>
+        }
         @if (HasAny(DamageContext.Street, DamageContext.City, DamageContext.State, DamageContext.Zip))
         {
             <div>
@@ -12,17 +18,13 @@
                 </div>
             </div>
         }
-        @if (DamageContext.DateOfLoss != default)
-        {
-            <div>
-                <div>on</div>
-                <strong>@($"{DamageContext.DateOfLoss:g}")</strong>
-            </div>
-        }
+        <div>
+            Service requested:
+        </div>
         @foreach (var item in DamageContext.Sections?.Where(x => HasValue(x.Entry)) ?? [])
         {
             <div>
-                Requested <strong>@item.DamageSectionType?.Name</strong>
+                <strong>@item.DamageSectionType?.Name</strong>
                 <div>@item.Entry</div>
             </div>
         }
