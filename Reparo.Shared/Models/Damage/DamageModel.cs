@@ -1,18 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 public sealed class DamageEntrySection
 {
-    public long Id { get; set; }
-
+    public int Id { get; set; }
     // FK → damage_entries.id
-    public long DamageEntryId { get; set; }
+    public int DamageEntryId { get; set; }
     // FK → damage_section_types.id
     public int DamageSectionId { get; set; }
 
     public string? Entry { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
 
-    // Navigation Properties
     public DamageSectionType? DamageSectionType { get; set; }
 }
 
@@ -20,14 +19,14 @@ public sealed class DamageSectionType
 {
     public int Id { get; set; }
     public string Name { get; set; } = default!;
-    public string? Description { get; set; }
+    public string Description { get; set; } = default!;
     public bool IsEmergency { get; set; }
 }
 
 public class DamageEntry : IValidatableObject
 {
-    public long Id { get; set; }
-    public bool IsProcessed { get; set; }
+    public int Id { get; set; }
+    public int StatusId { get; set; }
 
     [Required(ErrorMessage = "What's the property address? (Street, city, state, or ZIP code)")]
     public string? AddressEntry { get; set; }
@@ -54,27 +53,33 @@ public class DamageEntry : IValidatableObject
 
     public string? FullName { get; set; }
     public string? Phone { get; set; }
+
     [EmailAddress]
     public string? Email { get; set; }
 
     [DateGreaterThan(2000, 1, 1, ErrorMessage = "Date must be after 01/01/2000")]
     public DateTimeOffset DateOfLoss { get; set; }
+
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 
     public int? UserId { get; set; }
-    public AppUser? User { get; set; } = default!;
+    [JsonIgnore]
+    public AppUser? User { get; set; }
 
     public int? VendorId { get; set; }
-    public VendorModel? Vendor { get; set; } = default!;
+    [JsonIgnore]
+    public VendorModel? Vendor { get; set; }
 
-    public List<DamageEntrySection> Sections { get; set; } = new List<DamageEntrySection>();
+    public List<DamageEntrySection> Sections { get; set; } = [];
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (Sections.All(d => d.Entry == null))
+        if (Sections.Count == 0 || Sections.All(x => string.IsNullOrWhiteSpace(x.Entry)))
         {
-            yield return new ValidationResult("Select a damage type to describe the damage", [nameof(Sections)]);
+            yield return new ValidationResult(
+                "Select a damage type to describe the damage.",
+                [nameof(Sections)]);
         }
     }
 
@@ -86,7 +91,7 @@ public class DamageEntry : IValidatableObject
         if (!string.IsNullOrWhiteSpace(ContactEntry)) parts.Add(ContactEntry);
         if (!string.IsNullOrWhiteSpace(InsuranceEntry)) parts.Add(InsuranceEntry);
 
-        if (Sections?.Any() == true)
+        if (Sections.Count == 0 || Sections.All(x => string.IsNullOrWhiteSpace(x.Entry)))
         {
             parts.AddRange(
                 Sections.Where(d => !string.IsNullOrWhiteSpace(d.Entry))

@@ -4,20 +4,24 @@ using Microsoft.EntityFrameworkCore;
 public sealed partial class AppDbContext
     : IdentityDbContext<AppUser, AppRole, int>
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+    }
 
-    // Domain tables only
     public DbSet<DamageEntry> DamageEntries => Set<DamageEntry>();
     public DbSet<DamageEntrySection> DamageEntrySections => Set<DamageEntrySection>();
     public DbSet<DamageSectionType> DamageSectionTypes => Set<DamageSectionType>();
+    public DbSet<VendorModel> Vendors => Set<VendorModel>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
+        const string schema = "public";
+
         modelBuilder
-            .ConfigureIdentityDomain("public")
-            .ConfigureDamageDomain("public")
-            .ConfigureVendorDomain("public");
+            .ConfigureIdentityDomain(schema)
+            .ConfigureDamageDomain(schema)
+            .ConfigureVendorDomain(schema);
     }
 }

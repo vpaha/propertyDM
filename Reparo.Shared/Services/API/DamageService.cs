@@ -8,8 +8,8 @@ public interface IDamageService
     Task<IReadOnlyList<DamageSectionType>> ListSectionTypesAsync(CancellationToken ct = default);
     Task<IReadOnlyList<DamageEntry>> ListUserDamageEntriesAsync(int? userId, CancellationToken ct = default);
     Task<IReadOnlyList<DamageEntry>> ListVendorDamageEntriesAsync(int vendorId, CancellationToken ct = default);
-    Task<long> AddEntryAsync(DamageEntry entry, CancellationToken ct = default);
-    Task<long> UpdateEntryAsync(DamageEntry entry, CancellationToken ct = default);
+    Task<int> AddEntryAsync(DamageEntry entry, CancellationToken ct = default);
+    Task<int> UpdateEntryAsync(DamageEntry entry, CancellationToken ct = default);
 }
 
 public sealed class DamageService : IDamageService
@@ -35,20 +35,18 @@ public sealed class DamageService : IDamageService
 
     public async Task<IReadOnlyList<DamageEntry>> ListUserDamageEntriesAsync(int? userId, CancellationToken ct = default)
     {
-        var query = _context.DamageEntries.AsNoTracking().Include(e => e.Sections).ThenInclude(s => s.DamageSectionType)
-            .Include(e => e.Vendor)
-            .AsSplitQuery();
-
-        query = userId.HasValue
-            ? query.Where(e => e.UserId == userId.Value)
-            : query.Where(e => e.UserId == null);
+        var query = _context.DamageEntries.AsNoTracking().Include(e => e.Sections).ThenInclude(s => s.DamageSectionType).Include(e => e.Vendor).AsSplitQuery();
+        if (userId.HasValue)
+            query = query.Where(e => e.UserId == userId.Value);
+        else
+            query = query.Where(e => e.UserId == null);
 
         return await query.OrderByDescending(e => e.CreatedAt).ToListAsync(ct);
     }
 
     public async Task<IReadOnlyList<DamageEntry>> ListVendorDamageEntriesAsync(int vendorId, CancellationToken ct = default)
     {
-        return await _context.DamageEntries.AsNoTracking().Where(e => e.VendorId == vendorId).Include(e => e.Sections).ThenInclude(s => s.DamageSectionType).OrderByDescending(e => e.CreatedAt).ToListAsync(ct);
+        return await _context.DamageEntries.AsNoTracking().Where(e => e.VendorId == vendorId).Include(e => e.Sections).ThenInclude(s => s.DamageSectionType).AsSplitQuery().OrderByDescending(e => e.CreatedAt).ToListAsync(ct);
     }
 
     public async Task<IReadOnlyList<DamageSectionType>> ListSectionTypesAsync(CancellationToken ct = default)
@@ -73,7 +71,7 @@ public sealed class DamageService : IDamageService
     }
 
     // Adds a DamageEntry only (no sections)
-    public async Task<long> AddEntryAsync(DamageEntry entry, CancellationToken ct = default)
+    public async Task<int> AddEntryAsync(DamageEntry entry, CancellationToken ct = default)
     {
         var now = DateTimeOffset.UtcNow;
 
@@ -95,7 +93,7 @@ public sealed class DamageService : IDamageService
         return entry.Id;
     }
 
-    public async Task<long> UpdateEntryAsync(DamageEntry entry, CancellationToken ct = default)
+    public async Task<int> UpdateEntryAsync(DamageEntry entry, CancellationToken ct = default)
     {
         var now = DateTimeOffset.UtcNow;
         entry.UpdatedAt = entry.UpdatedAt == default ? now : entry.UpdatedAt;

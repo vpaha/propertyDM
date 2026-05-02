@@ -86,6 +86,10 @@
             {
                 Content = "Close"
             },
+            AnimationSettings = new DialogAnimationOptions
+            {
+                Effect = DialogEffect.FlipXUp
+            },
             ChildContent = builder =>
             {
                 builder.OpenComponent<VendorDetails>(0);

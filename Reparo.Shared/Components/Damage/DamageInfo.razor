@@ -10,13 +10,11 @@
     </CardContent>
     <CardContent EnableSeparator="true">
         <div class="spread-across">
-            <div>
-                Status: Waiting for Vendor Assignment
-            </div>
+            <SfMessage Severity="@GetSeverity(DamageContext.StatusId)">@GetStatusText(DamageContext.StatusId)</SfMessage>
             <SfButton type="button"
                       OnClick="OnSubmit"
                       IconCss="e-icons e-smart-paste" IconPosition="IconPosition.Right" IsPrimary="true"
-                      CssClass="@(DamageContext?.IsProcessed==true ? "" : "e-outline")"
+                      CssClass="e-outline"
                       Content="Proceed with Service">
             </SfButton>
         </div>
@@ -37,5 +35,35 @@
 
     private async Task OnSubmit()
     {
+    }
+
+    private MessageSeverity GetSeverity(int statusId)
+    {
+        return (DamageStatus)statusId switch
+        {
+            DamageStatus.Reported or DamageStatus.WaitingForVendorAssignment or DamageStatus.EstimatePending
+                => MessageSeverity.Info,
+            DamageStatus.VendorAssigned or DamageStatus.ServiceScheduled or DamageStatus.InspectionScheduled
+                => MessageSeverity.Success,
+
+            DamageStatus.WorkInProgress
+                => MessageSeverity.Warning,
+
+            DamageStatus.WorkCompleted or DamageStatus.Closed
+                => MessageSeverity.Success,
+
+            DamageStatus.Cancelled
+                => MessageSeverity.Error,
+
+            DamageStatus.OnHold
+                => MessageSeverity.Warning,
+
+            _ => MessageSeverity.Info
+        };
+    }
+
+    private string GetStatusText(int statusId)
+    {
+        return ((DamageStatus)statusId).ToString();
     }
 }
