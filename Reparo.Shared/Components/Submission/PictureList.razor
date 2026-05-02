@@ -1,4 +1,7 @@
 ﻿@using Syncfusion.Blazor.Navigations
+@using Microsoft.Extensions.Hosting;
+
+@inject IHostEnvironment environment
 
 <SfCarousel ID="control-container" AnimationEffect="CarouselAnimationEffect.Fade">
     @if (!Images.Any())
@@ -31,20 +34,33 @@
 
     protected override void OnParametersSet()
     {
-        var uploadDirectory = Path.Combine("wwwroot", "Images", DamageId.ToString());
+        Images = LoadImages();
+    }
+
+    private List<ImageItem> LoadImages()
+    {
+        var uploadDirectory = GetUploadDirectory();
         if (!Directory.Exists(uploadDirectory))
         {
-            Images = [];
-            return;
+            return [];
         }
+        return Directory.EnumerateFiles(uploadDirectory).Where(IsImageFile).Select(CreateImageItem).ToList();
+    }
 
-        Images = Directory.EnumerateFiles(uploadDirectory).Where(IsImageFile)
-            .Select(file => new ImageItem
-            {
-                FileName = Path.GetFileName(file),
-                Url = $"/Images/{DamageId}/{Path.GetFileName(file)}"
-            })
-            .ToList();
+    private string GetUploadDirectory()
+    {
+        var uploadRoot = Path.Combine(environment.ContentRootPath, "Uploads");
+        return Path.Combine(uploadRoot, DamageId.ToString());
+    }
+
+    private ImageItem CreateImageItem(string file)
+    {
+        var fileName = Path.GetFileName(file);
+        return new ImageItem
+        {
+            FileName = fileName,
+            Url = $"/Uploads/{DamageId}/{fileName}"
+        };
     }
 
     private static bool IsImageFile(string filePath)

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.FileProviders;
 using OpenAI;
 using Serilog;
 using Stripe;
@@ -219,6 +220,15 @@ public partial class Program
         app.UseHttpsRedirection();
 
         app.UseStaticFiles();
+
+        var uploadRoot = Path.Combine(app.Environment.ContentRootPath, "Uploads");
+        Directory.CreateDirectory(uploadRoot);
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(uploadRoot),
+            RequestPath = "/Uploads"
+        });
+
         app.UseHttpLogging();
 
         app.UseRouting();

@@ -1,50 +1,70 @@
-﻿<SfCard role="region">
+﻿@using Microsoft.Extensions.Hosting;
+
+@inject IHostEnvironment environment
+
+<SfCard role="region">
     <CardHeader>
         <h2>Image Upload</h2>
     </CardHeader>
+
     <CardContent>
         <SfUploader ID="UploadFiles"
                     AutoUpload="true"
                     AllowMultiple="true"
                     AllowedExtensions=".jpg,.jpeg,.png,.gif,.webp"
-                    MaxFileSize="104857600"
-                    EnableHtmlSanitizer="true"
-                    EnablePersistence="true">
+                    MaxFileSize="@MaxFileSize"
+                    EnableHtmlSanitizer="true">
             <UploaderEvents ValueChange="OnChange" OnRemove="OnRemove" />
         </SfUploader>
     </CardContent>
 </SfCard>
 
 @code {
+    private const long MaxFileSize = 104_857_600; // 100 MB
+
     [Parameter] public int DamageId { get; set; }
 
-    private string uploadDirectory = default!;
+    private string UploadDirectory => Path.Combine(environment.ContentRootPath, "Uploads", DamageId.ToString());
 
     protected override void OnParametersSet()
     {
-        uploadDirectory = Path.Combine("wwwroot", "Images", DamageId.ToString());
-        Directory.CreateDirectory(uploadDirectory);
+        Directory.CreateDirectory(UploadDirectory);
     }
 
     private async Task OnChange(UploadChangeEventArgs args)
     {
+        Directory.CreateDirectory(UploadDirectory);
+
         foreach (var file in args.Files)
         {
             var fileName = Path.GetFileName(file.FileInfo.Name);
-            var filePath = Path.Combine(uploadDirectory, fileName);
+            var filePath = Path.Combine(UploadDirectory, fileName);
 
-            await using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
-            await file.File.OpenReadStream(long.MaxValue).CopyToAsync(fileStream);
+            await using var fileStream = new FileStream(
+                filePath,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None);
+
+            await file.File
+                .OpenReadStream(MaxFileSize)
+                .CopyToAsync(fileStream);
         }
     }
 
-    private async Task OnRemove(RemovingEventArgs args)
+    private Task OnRemove(RemovingEventArgs args)
     {
         foreach (var file in args.FilesData)
         {
             var fileName = Path.GetFileName(file.Name);
-            var filePath = Path.Combine(uploadDirectory, fileName);
-            if (File.Exists(filePath)) File.Delete(filePath);
+            var filePath = Path.Combine(UploadDirectory, fileName);
+
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
         }
+
+        return Task.CompletedTask;
     }
 }
