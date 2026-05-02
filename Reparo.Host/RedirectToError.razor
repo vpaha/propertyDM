@@ -1,0 +1,14 @@
+﻿<SfCard>
+    <CardHeader>
+        <h1>An error occurred.</h1>
+    </CardHeader>
+    <CardContent EnableSeparator="true">
+        <p><strong>Type:</strong> @Exception?.GetType().FullName</p>
+        <p><strong>Message:</strong> @Exception?.Message</p>
+        <pre>@Exception?.StackTrace</pre>
+    </CardContent>
+</SfCard>
+
+@code {
+    [Parameter] public Exception? Exception { get; set; }
+}

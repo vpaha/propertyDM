@@ -32,7 +32,7 @@ public partial class Program
 
         var pathBase = NormalizePathBase(config["AppBasePath"] ?? throw new InvalidOperationException("AppBasePath is not configured"));
         var googleApiKey = config["GoogleMaps:ApiKey"] ?? string.Empty;
-        var detailedErrors = config.GetValue("DetailedErrors", false);
+        var detailedErrors = config.GetValue("DetailedErrors", true);
 
         ConfigureFrameworkServices(builder, detailedErrors);
         ConfigureLocalization(builder);
@@ -83,7 +83,7 @@ public partial class Program
         builder.Services.AddHostAuthentication(builder.Configuration);
 
         builder.Services.AddRazorComponents(o => o.DetailedErrors = detailedErrors)
-            .AddInteractiveServerComponents()
+            .AddInteractiveServerComponents(o => o.DetailedErrors = detailedErrors)
             .AddInteractiveWebAssemblyComponents()
             .AddAuthenticationStateSerialization(o => o.SerializeAllClaims = true);
 

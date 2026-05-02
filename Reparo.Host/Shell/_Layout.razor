@@ -1,7 +1,16 @@
 ﻿@inherits LayoutComponentBase
+
 <BreakpointProvider>
-    @Body
+    <ErrorBoundary>
+        <ChildContent>
+            @Body
+        </ChildContent>
+        <ErrorContent Context="ex">
+            <RedirectToError Exception="ex" />
+        </ErrorContent>
+    </ErrorBoundary>
 </BreakpointProvider>
+
 <article id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
     <a href="." class="reload">Reload</a>
@@ -10,7 +19,7 @@
 
 <style>
     #blazor-error-ui {
-        background-color: red;
+        background-color: mediumpurple;
         color: white;
         display: none;
         padding: 0.6rem 1.25rem 0.7rem 1.25rem;
