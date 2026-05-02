@@ -20,6 +20,7 @@
 </style>
 
 @code {
+    [Parameter]
     public string? PlaceId { get; set; }
     [Inject]
     public DamageState DamageState { get; set; } = default!;
