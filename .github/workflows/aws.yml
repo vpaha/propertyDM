@@ -97,12 +97,11 @@ jobs:
                 { "name": "GoogleMaps__ApiKey", "value": "${{ secrets.GOOGLEMAPS__APIKEY }}" },
                 { "name": "ConnectionStrings__DefaultConnection", "value": "${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}" },
                 { "name": "AI__openAIApiKey", "value": "${{ secrets.AI__OPENAIAPIKEY }}" },
-                { "name": "AI__openAIModel", "value": "gpt-3.5-turbo" },
+                { "name": "AI__openAIModel", "value": "${{ secrets.AI__OPENAIMODEL }}" },
                 { "name": "Endpoints__Api__ClaimUri", "value": "https://qn-azodv-340.tzhealthcare.com/QNXTApi/Claim/" },
                 { "name": "AWS__BucketName", "value": "${{ secrets.AWS__BUCKETNAME }}" },
                 { "name": "AWS__Region", "value": "${{ secrets.AWS__REGION }}" }
-              ] |
-              .secrets = []
+              ]
             else
               .
             end
