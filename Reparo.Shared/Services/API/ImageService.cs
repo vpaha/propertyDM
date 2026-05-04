@@ -83,8 +83,7 @@ public sealed class S3DamageImageService : IDamageImageService
 
     private static string BuildKey(int damageId, string fileName)
     {
-        var safeName = Path.GetFileName(fileName);
-        return $"damage-images/{damageId}/{Guid.NewGuid()}-{safeName}";
+        return $"damage-images/{damageId}/{fileName}";
     }
 
     private string GeneratePreSignedUrl(string key)

@@ -1,9 +1,9 @@
 {
   "profiles": {
-    "Run Prod": {
+    "Run Staging": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "rep-wasm/",
+      "launchUrl": "qnxt-web/",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Staging"
       },

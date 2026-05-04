@@ -11,7 +11,7 @@
 		<RootNamespace>Reparo</RootNamespace>
 		<UserSecretsId>d6c3271d-57ef-4c3d-8657-34257ee35848</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-		<AssemblyVersion>4.0.6.8</AssemblyVersion>
+		<AssemblyVersion>4.0.7.0</AssemblyVersion>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'" />

@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.FileProviders;
 using OpenAI;
 using Serilog;
 using Stripe;
@@ -32,9 +31,11 @@ public partial class Program
 
         RegisterSyncfusion(config);
 
-        var pathBase = NormalizePathBase(config["AppBasePath"] ?? throw new InvalidOperationException("AppBasePath is not configured"));
-        var googleApiKey = config["GoogleMaps:ApiKey"] ?? string.Empty;
-        var detailedErrors = config.GetValue("DetailedErrors", true);
+        var pathBase = normalizePathBase(config["AppBasePath"]);
+        var googleApiKey = config["GoogleMaps:ApiKey"];
+        if (string.IsNullOrWhiteSpace(googleApiKey)) throw new InvalidOperationException("googleApiKey is not configured.");
+
+        var detailedErrors = config.GetValue("DetailedErrors", false);
 
         ConfigureFrameworkServices(builder, detailedErrors);
         ConfigureLocalization(builder);
@@ -54,13 +55,14 @@ public partial class Program
 
     private void RegisterSyncfusion(IConfiguration config)
     {
-        var key = config["Syncfusion:LicenseKey"] ?? throw new InvalidOperationException("Syncfusion license key is not configured.");
+        var key = config["Syncfusion:LicenseKey"];
+        if (string.IsNullOrWhiteSpace(key)) throw new InvalidOperationException("Syncfusion license key is not configured.");
         SyncfusionLicenseProvider.RegisterLicense(key);
     }
 
     private void AddUserSecretsIfDev(WebApplicationBuilder builder)
     {
-        if (builder.Environment.IsDevelopment())
+        if (!builder.Environment.IsProduction())
             builder.Configuration.AddUserSecrets(typeof(Program).Assembly, optional: true);
     }
 
@@ -69,12 +71,20 @@ public partial class Program
         builder.Host.UseSerilog((ctx, services, cfg) =>
         {
             cfg.ReadFrom.Configuration(ctx.Configuration).ReadFrom.Services(services);
-            if (ctx.HostingEnvironment.IsDevelopment()) cfg.WriteTo.Console().WriteTo.Debug();
+            if (ctx.HostingEnvironment.IsDevelopment())
+            {
+                cfg.WriteTo.Console().WriteTo.Debug();
+            }
             else
             {
                 var logDirectory = Path.Combine(builder.Environment.ContentRootPath, "Logs");
                 Directory.CreateDirectory(logDirectory);
-                cfg.WriteTo.File(Path.Combine(logDirectory, "log.txt"), rollingInterval: RollingInterval.Day);
+
+                cfg.WriteTo.File(
+                    Path.Combine(logDirectory, "log-.txt"),
+                    rollingInterval: RollingInterval.Day,
+                    retainedFileCountLimit: 7,
+                    shared: true);
             }
         });
         builder.Logging.ClearProviders();
@@ -132,6 +142,8 @@ public partial class Program
         //Amazon
         builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
         builder.Services.AddAWSService<IAmazonS3>();
+        builder.Services.AddHostedService<S3LogUploadService>();
+
         builder.Services.AddScoped<IDamageImageService, S3DamageImageService>();
         // UI
         builder.Services.AddScoped<ToastService>();
@@ -162,12 +174,16 @@ public partial class Program
         });
 
         // Corp API
-        var claimUri = config["Endpoints:Api:ClaimUri"] ?? throw new InvalidOperationException("Endpoints:Api:ClaimUri is not configured.");
-        var envId = config["UserEnvironment:EnvId"] ?? throw new InvalidOperationException("UserEnvironment:EnvId is not configured.");
+        var claimUri = config["Endpoints:Api:ClaimUri"];
+        if (string.IsNullOrWhiteSpace(claimUri)) throw new InvalidOperationException("Endpoints:Api:ClaimUri is not configured");
+
+        var envId = config["UserEnvironment:EnvId"];
+        if (string.IsNullOrWhiteSpace(envId)) throw new InvalidOperationException("UserEnvironment:EnvId is not configured.");
 
         //var licenseManager = new LicenseManager();
         //var partnerBlock = licenseManager.CreatePartnerBlock("QNXT MODERNIZATION UI", "json").ToBase64String();
-        var partnerBlock = config["UserEnvironment:PartnerBlock"] ?? throw new InvalidOperationException("UserEnvironment:PartnerBlock is not configured.");
+        var partnerBlock = config["UserEnvironment:PartnerBlock"];
+        if (string.IsNullOrWhiteSpace(partnerBlock)) throw new InvalidOperationException("UserEnvironment:PartnerBlock is not configured.");
 
         builder.Services.Configure<TokenHandlerOptions>(options =>
         {
@@ -250,7 +266,7 @@ public partial class Program
         app.MapGroup("googlemap").MapGoogleMapEndpoints(googleApiKey);
         app.MapGroup("damage").MapDamageEndpoints();
         app.MapGroup("vendor").MapVendorEndpoints().RequireAuthorization();
-//        app.MapGroup("pay").MapPayment().RequireAuthorization();
+        //        app.MapGroup("pay").MapPayment().RequireAuthorization();
     }
 
     private void MapRazorComponents(WebApplication app)
@@ -318,9 +334,9 @@ public partial class Program
         }
     }
 
-    private string NormalizePathBase(string pathBase)
+    private string normalizePathBase(string? pathBase)
     {
-        if (string.IsNullOrWhiteSpace(pathBase)) return string.Empty;
+        if (string.IsNullOrWhiteSpace(pathBase)) throw new InvalidOperationException("AppBasePath is not configured");
         if (!pathBase.StartsWith('/')) pathBase = "/" + pathBase;
         return pathBase.TrimEnd('/');
     }
