@@ -80,11 +80,11 @@ public partial class Program
                 var logDirectory = Path.Combine(builder.Environment.ContentRootPath, "Logs");
                 Directory.CreateDirectory(logDirectory);
 
-                //cfg.WriteTo.File(
-                //    Path.Combine(logDirectory, "log-.txt"),
-                //    rollingInterval: RollingInterval.Day,
-                //    retainedFileCountLimit: 7,
-                //    shared: true);
+                cfg.WriteTo.File(
+                    Path.Combine(logDirectory, "log-.txt"),
+                    rollingInterval: RollingInterval.Day,
+                    retainedFileCountLimit: 7,
+                    shared: true);
             }
         });
         builder.Logging.ClearProviders();
@@ -140,9 +140,15 @@ public partial class Program
         builder.Services.AddSingleton(new StripeClient("sk_test_51TG7e18LrDbU9B5cfEkBWsaoGNguzvdvvG8qwuUm51eVx4ctFMAyg3R3GfxjJhUbVrRoaK7W8YfnDsIB4NtCTli500uJWmhLHq"));
 
         //Amazon
+        var bucketName = builder.Configuration["AWS:BucketName"];
+        var region = builder.Configuration["AWS:Region"];
+
+        if (!string.IsNullOrWhiteSpace(bucketName) && !string.IsNullOrWhiteSpace(region))
+        {
+            builder.Services.AddHostedService<S3LogUploadService>();
+        }
         builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
         builder.Services.AddAWSService<IAmazonS3>();
-//        builder.Services.AddHostedService<S3LogUploadService>();
 
         builder.Services.AddScoped<IDamageImageService, S3DamageImageService>();
         // UI
