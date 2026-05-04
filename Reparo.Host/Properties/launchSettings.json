@@ -1,11 +1,11 @@
 {
   "profiles": {
-    "Run Staging": {
+    "Run Prod": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "qnxt-web/",
+      "launchUrl": "",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Staging"
+        "ASPNETCORE_ENVIRONMENT": "Production"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:8081;http://localhost:8080",

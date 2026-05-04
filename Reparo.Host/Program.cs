@@ -80,11 +80,11 @@ public partial class Program
                 var logDirectory = Path.Combine(builder.Environment.ContentRootPath, "Logs");
                 Directory.CreateDirectory(logDirectory);
 
-                cfg.WriteTo.File(
-                    Path.Combine(logDirectory, "log-.txt"),
-                    rollingInterval: RollingInterval.Day,
-                    retainedFileCountLimit: 7,
-                    shared: true);
+                //cfg.WriteTo.File(
+                //    Path.Combine(logDirectory, "log-.txt"),
+                //    rollingInterval: RollingInterval.Day,
+                //    retainedFileCountLimit: 7,
+                //    shared: true);
             }
         });
         builder.Logging.ClearProviders();
