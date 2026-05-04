@@ -1,23 +1,25 @@
 ﻿@using Syncfusion.Blazor.Navigations
-@using Microsoft.Extensions.Hosting;
 
-@inject IHostEnvironment environment
+@inject IDamageImageService ImageService
 
 <SfCarousel ID="control-container" AnimationEffect="CarouselAnimationEffect.Fade">
     @if (!Images.Any())
     {
-        <h2>
-            No images have been uploaded.
-        </h2>
-    }
-    @foreach (var image in Images)
-    {
         <CarouselItem>
-            <figure>
-                <img src="@image.Url" alt="@image.FileName" />
-                <figcaption>@image.FileName</figcaption>
-            </figure>
+            <h2>No images have been uploaded.</h2>
         </CarouselItem>
+    }
+    else
+    {
+        @foreach (var image in Images)
+        {
+            <CarouselItem>
+                <figure>
+                    <img src="@image.Url" alt="@image.FileName" />
+                    <figcaption>@image.FileName</figcaption>
+                </figure>
+            </CarouselItem>
+        }
     }
 </SfCarousel>
 
@@ -25,6 +27,12 @@
     #control-container {
         margin: 0 auto;
     }
+
+        #control-container img {
+            max-width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+        }
 </style>
 
 @code {
@@ -32,46 +40,8 @@
 
     private List<ImageItem> Images { get; set; } = [];
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
-        Images = LoadImages();
-    }
-
-    private List<ImageItem> LoadImages()
-    {
-        var uploadDirectory = GetUploadDirectory();
-        if (!Directory.Exists(uploadDirectory))
-        {
-            return [];
-        }
-        return Directory.EnumerateFiles(uploadDirectory).Where(IsImageFile).Select(CreateImageItem).ToList();
-    }
-
-    private string GetUploadDirectory()
-    {
-        var uploadRoot = Path.Combine(environment.ContentRootPath, "Uploads");
-        return Path.Combine(uploadRoot, DamageId.ToString());
-    }
-
-    private ImageItem CreateImageItem(string file)
-    {
-        var fileName = Path.GetFileName(file);
-        return new ImageItem
-        {
-            FileName = fileName,
-            Url = $"/Uploads/{DamageId}/{fileName}"
-        };
-    }
-
-    private static bool IsImageFile(string filePath)
-    {
-        var extension = Path.GetExtension(filePath).ToLowerInvariant();
-        return extension is ".jpg" or ".jpeg" or ".png" or ".gif" or ".webp";
-    }
-
-    private sealed class ImageItem
-    {
-        public string FileName { get; set; } = string.Empty;
-        public string Url { get; set; } = string.Empty;
+        Images = await ImageService.ListAsync(DamageId);
     }
 }

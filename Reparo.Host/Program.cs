@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.HttpLogging;
+﻿using Amazon.S3;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
@@ -127,6 +128,11 @@ public partial class Program
     private void ConfigureAppServices(WebApplicationBuilder builder, IConfiguration config, string configuredPathBase)
     {
         builder.Services.AddSingleton(new StripeClient("sk_test_51TG7e18LrDbU9B5cfEkBWsaoGNguzvdvvG8qwuUm51eVx4ctFMAyg3R3GfxjJhUbVrRoaK7W8YfnDsIB4NtCTli500uJWmhLHq"));
+
+        //Amazon
+        builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+        builder.Services.AddAWSService<IAmazonS3>();
+        builder.Services.AddScoped<IDamageImageService, S3DamageImageService>();
         // UI
         builder.Services.AddScoped<ToastService>();
         builder.Services.AddScoped<SfDialogService>();
@@ -220,15 +226,6 @@ public partial class Program
         app.UseHttpsRedirection();
 
         app.UseStaticFiles();
-
-        var uploadRoot = Path.Combine(app.Environment.ContentRootPath, "Uploads");
-        Directory.CreateDirectory(uploadRoot);
-        app.UseStaticFiles(new StaticFileOptions
-        {
-            FileProvider = new PhysicalFileProvider(uploadRoot),
-            RequestPath = "/Uploads"
-        });
-
         app.UseHttpLogging();
 
         app.UseRouting();

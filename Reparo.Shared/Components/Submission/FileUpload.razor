@@ -1,6 +1,4 @@
-﻿@using Microsoft.Extensions.Hosting;
-
-@inject IHostEnvironment environment
+﻿@inject IDamageImageService ImageService
 
 <SfCard role="region">
     <CardHeader>
@@ -24,47 +22,29 @@
 
     [Parameter] public int DamageId { get; set; }
 
-    private string UploadDirectory => Path.Combine(environment.ContentRootPath, "Uploads", DamageId.ToString());
-
-    protected override void OnParametersSet()
-    {
-        Directory.CreateDirectory(UploadDirectory);
-    }
-
     private async Task OnChange(UploadChangeEventArgs args)
     {
-        Directory.CreateDirectory(UploadDirectory);
-
         foreach (var file in args.Files)
         {
             var fileName = Path.GetFileName(file.FileInfo.Name);
-            var filePath = Path.Combine(UploadDirectory, fileName);
 
-            await using var fileStream = new FileStream(
-                filePath,
-                FileMode.Create,
-                FileAccess.Write,
-                FileShare.None);
+            await using var stream = file.File.OpenReadStream(MaxFileSize);
 
-            await file.File
-                .OpenReadStream(MaxFileSize)
-                .CopyToAsync(fileStream);
+            await ImageService.UploadAsync(
+                DamageId,
+                fileName,
+                file.FileInfo.MimeContentType,
+                stream);
         }
     }
 
-    private Task OnRemove(RemovingEventArgs args)
+    private async Task OnRemove(RemovingEventArgs args)
     {
         foreach (var file in args.FilesData)
         {
             var fileName = Path.GetFileName(file.Name);
-            var filePath = Path.Combine(UploadDirectory, fileName);
 
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-            }
+            await ImageService.DeleteAsync(DamageId, fileName);
         }
-
-        return Task.CompletedTask;
     }
 }

@@ -15,6 +15,7 @@
     <None Remove="Interfaces\**" />
   </ItemGroup>
   <ItemGroup>
+	<PackageReference Include="AWSSDK.S3" Version="4.0.22.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.2" />
