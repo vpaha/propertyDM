@@ -81,7 +81,7 @@ jobs:
             if .name == "Main" then
               .environment = [
                 { "name": "AppBasePath", "value": "/" },
-                { "name": "DetailedErrors", "value": "false" },
+                { "name": "DetailedErrors", "value": "true" },
                 { "name": "UserEnvironment__OidcClientOptions__Authority", "value": "${{ secrets.USERENVIRONMENT__OIDCCLIENTOPTIONS__AUTHORITY }}" },
                 { "name": "UserEnvironment__OidcClientOptions__Client_Id", "value": "Qnxt.Member.Client" },
                 { "name": "UserEnvironment__OidcClientOptions__Scope", "value": "openid profile roles qnxt-member-api" },
@@ -99,8 +99,8 @@ jobs:
                 { "name": "AI__openAIApiKey", "value": "${{ secrets.AI__OPENAIAPIKEY }}" },
                 { "name": "AI__openAIModel", "value": "gpt-3.5-turbo" },
                 { "name": "Endpoints__Api__ClaimUri", "value": "https://qn-azodv-340.tzhealthcare.com/QNXTApi/Claim/" },
-                { "name": "AWS__BucketName", "value": "reparo-669308277857-us-east-1-an" },
-                { "name": "AWS__Region", "value": "us-east-1" }
+                { "name": "AWS__BucketName", "value": "${{ secrets.AWS__BUCKETNAME }}" },
+                { "name": "AWS__Region", "value": "${{ secrets.AWS__REGION }}" }
               ] |
               .secrets = []
             else
