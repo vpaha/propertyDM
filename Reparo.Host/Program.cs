@@ -142,7 +142,7 @@ public partial class Program
         //Amazon
         builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
         builder.Services.AddAWSService<IAmazonS3>();
-        builder.Services.AddHostedService<S3LogUploadService>();
+//        builder.Services.AddHostedService<S3LogUploadService>();
 
         builder.Services.AddScoped<IDamageImageService, S3DamageImageService>();
         // UI
