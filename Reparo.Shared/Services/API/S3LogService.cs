@@ -2,16 +2,13 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
-public sealed class S3LogUploadService : BackgroundService
+public sealed class S3LogService : BackgroundService
 {
     private readonly IAmazonS3 _s3;
     private readonly IHostEnvironment _env;
     private readonly IConfiguration _config;
 
-    public S3LogUploadService(
-        IAmazonS3 s3,
-        IHostEnvironment env,
-        IConfiguration config)
+    public S3LogService(IAmazonS3 s3, IHostEnvironment env, IConfiguration config)
     {
         _s3 = s3;
         _env = env;
@@ -40,7 +37,7 @@ public sealed class S3LogUploadService : BackgroundService
                     await _s3.PutObjectAsync(new Amazon.S3.Model.PutObjectRequest
                     {
                         BucketName = bucket,
-                        Key = $"logs/{DateTime.UtcNow:yyyy/MM/dd}/{fileName}",
+                        Key = $"logs/{DateTime.UtcNow:yyyy/MM}/{fileName}",
                         InputStream = stream,
                         ContentType = "text/plain"
                     }, stoppingToken);

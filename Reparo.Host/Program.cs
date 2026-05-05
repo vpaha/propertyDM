@@ -140,16 +140,10 @@ public partial class Program
         builder.Services.AddSingleton(new StripeClient("sk_test_51TG7e18LrDbU9B5cfEkBWsaoGNguzvdvvG8qwuUm51eVx4ctFMAyg3R3GfxjJhUbVrRoaK7W8YfnDsIB4NtCTli500uJWmhLHq"));
 
         //Amazon
-        var bucketName = config["AWS:BucketName"];
-        var region = config["AWS:Region"];
-        if (!string.IsNullOrWhiteSpace(bucketName) && !string.IsNullOrWhiteSpace(region))
-        {
-            builder.Services.AddHostedService<S3LogUploadService>();
-            builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
-            builder.Services.AddAWSService<IAmazonS3>();
-        }
-
-        builder.Services.AddScoped<IDamageImageService, S3DamageImageService>();
+        builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+        builder.Services.AddAWSService<IAmazonS3>();
+        builder.Services.AddScoped<IImageService, S3ImageService>();
+        builder.Services.AddHostedService<S3LogService>();
         // UI
         builder.Services.AddScoped<ToastService>();
         builder.Services.AddScoped<SfDialogService>();

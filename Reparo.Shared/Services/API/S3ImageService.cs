@@ -2,23 +2,22 @@
 using Amazon.S3.Model;
 using Microsoft.Extensions.Configuration;
 
-public interface IDamageImageService
+public interface IImageService
 {
     Task UploadAsync(int damageId, string fileName, string contentType, Stream stream);
     Task DeleteAsync(int damageId, string fileName);
     Task<List<ImageItem>> ListAsync(int damageId);
 }
 
-public sealed class S3DamageImageService : IDamageImageService
+public sealed class S3ImageService : IImageService
 {
     private readonly IAmazonS3 _s3;
     private readonly string _bucket;
 
-    public S3DamageImageService(IAmazonS3 s3, IConfiguration config)
+    public S3ImageService(IAmazonS3 s3, IConfiguration config)
     {
         _s3 = s3;
-        _bucket = config["AWS:BucketName"]
-            ?? throw new InvalidOperationException("S3 bucket not configured.");
+        _bucket = config["AWS:BucketName"] ?? throw new InvalidOperationException("S3 bucket not configured.");
     }
 
     public async Task UploadAsync(int damageId, string fileName, string contentType, Stream stream)
