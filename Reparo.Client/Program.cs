@@ -9,9 +9,7 @@ internal class Program
         var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
         var syncfusionKey = builder.Configuration["Syncfusion:LicenseKey"];
-
-        if (!string.IsNullOrWhiteSpace(syncfusionKey))
-            SyncfusionLicenseProvider.RegisterLicense(syncfusionKey);
+        if (!string.IsNullOrWhiteSpace(syncfusionKey)) SyncfusionLicenseProvider.RegisterLicense(syncfusionKey);
 
         builder.Services.AddSyncfusionBlazor(options => { options.Animation = GlobalAnimationMode.Enable; options.EnableRippleEffect = true; });
 
