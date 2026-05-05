@@ -145,7 +145,7 @@ public partial class Program
 
         if (!string.IsNullOrWhiteSpace(bucketName) && !string.IsNullOrWhiteSpace(region))
         {
-            builder.Services.AddHostedService<S3LogUploadService>();
+       //     builder.Services.AddHostedService<S3LogUploadService>();
         }
         builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
         builder.Services.AddAWSService<IAmazonS3>();
