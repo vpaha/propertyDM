@@ -142,13 +142,12 @@ public partial class Program
         //Amazon
         var bucketName = config["AWS:BucketName"];
         var region = config["AWS:Region"];
-
         if (!string.IsNullOrWhiteSpace(bucketName) && !string.IsNullOrWhiteSpace(region))
         {
-       //     builder.Services.AddHostedService<S3LogUploadService>();
+            builder.Services.AddHostedService<S3LogUploadService>();
+            builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+            builder.Services.AddAWSService<IAmazonS3>();
         }
-        builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
-        builder.Services.AddAWSService<IAmazonS3>();
 
         builder.Services.AddScoped<IDamageImageService, S3DamageImageService>();
         // UI
